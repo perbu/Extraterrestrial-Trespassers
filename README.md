@@ -1,5 +1,7 @@
 # Extraterrestrial Trespassers
 
+![gameplay](img.png?raw=true "Gameplay")
+
 ## Description
 
 This is a simple game where you have to shoot down the aliens before they reach the 
