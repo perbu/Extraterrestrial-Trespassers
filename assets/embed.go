@@ -25,6 +25,9 @@ var blue []byte
 //go:embed projectile.png
 var projectile []byte
 
+//go:embed bomb.png
+var bomb []byte
+
 func GetPlayer() *ebiten.Image {
 	// load a png file:
 	img, err := png.Decode(bytes.NewReader(player))
@@ -73,6 +76,15 @@ func GetBlue() *ebiten.Image {
 
 func GetProjectile() *ebiten.Image {
 	img, err := png.Decode(bytes.NewReader(projectile))
+	if err != nil {
+		panic(err)
+	}
+	eimg := ebiten.NewImageFromImage(img)
+	return eimg
+}
+
+func GetBomb() *ebiten.Image {
+	img, err := png.Decode(bytes.NewReader(bomb))
 	if err != nil {
 		panic(err)
 	}

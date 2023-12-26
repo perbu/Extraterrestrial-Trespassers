@@ -17,7 +17,7 @@ const (
 func main() {
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowTitle("Space Invaders")
-	g := game.New(screenWidth, screenHeight, gameWidth, gameHeight)
+	g := game.New()
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatal(err)
 	}
