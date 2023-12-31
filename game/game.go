@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/perbu/spaceinvaders/assets"
@@ -28,15 +29,15 @@ type Position struct {
 
 func New() *Game {
 	return &Game{
-		Lives:      NewLife(0, 0, 3),
-		AlienFleet: newFleet(0, 50, gameMargin, gameWidth-gameMargin),
+		Lives:      NewLife(0, 0, 2),
+		AlienFleet: newFleet(0, 30, gameMargin, gameWidth-gameMargin),
 		Bombs:      make([]*Bomb, 0, 10),
 		Player: Player{
 			Position: Position{
 				X: gameWidth / 2,
 				Y: gameHeight - 50,
 			},
-			Sprite: assets.GetPlayer(),
+			Asset: assets.GetPlayer(),
 		},
 	}
 }
@@ -62,10 +63,10 @@ func (g *Game) Update() error {
 	g.AlienFleet.Update()
 	g.Projectiles = filterProjectiles(g.Projectiles)
 
-	// Check for collisions
+	// Check for collisions between projectiles and enemies
 	for _, e := range g.AlienFleet.Enemies {
 		for _, p := range g.Projectiles {
-			if e.Collides(p) {
+			if Collides(e.Asset, e.Position, p.Asset, p.Position) {
 				// remove the projectile from the screen
 				p.Position.Y = -10
 				// remove the enemy from the fleet:
@@ -76,6 +77,7 @@ func (g *Game) Update() error {
 	// remove dead enemies from the fleet
 	g.AlienFleet.Enemies = filterEnemies(g.AlienFleet.Enemies)
 
+	// Drop the bombs:
 	for _, e := range g.AlienFleet.Enemies {
 		// 1% chance of dropping a bomb
 		if rand.Intn(1000) == 1 {
@@ -87,6 +89,33 @@ func (g *Game) Update() error {
 		b.Update()
 	}
 	g.Bombs = filterBombs(g.Bombs)
+
+	// Check for collisions between bombs and player
+	for _, b := range g.Bombs {
+		if Collides(b.Asset, b.Position, g.Player.Asset, g.Player.Position) {
+			fmt.Println("Player hit by bomb")
+			g.Lives.NoOfLives--
+			b.Position.Y = -10
+
+		}
+	}
+	// check for collisions between bombs and projectiles
+	for _, b := range g.Bombs {
+		for _, p := range g.Projectiles {
+			if Collides(b.Asset, b.Position, p.Asset, p.Position) {
+				b.Position.Y = -10
+				p.Position.Y = -10
+			}
+		}
+	}
+	// check for collisions between player and enemies:
+	for _, e := range g.AlienFleet.Enemies {
+		if Collides(e.Asset, e.Position, g.Player.Asset, g.Player.Position) {
+			fmt.Println("Player hit by enemy")
+			g.Lives.NoOfLives--
+			e.dead = true
+		}
+	}
 	return nil
 }
 

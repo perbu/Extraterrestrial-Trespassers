@@ -7,7 +7,7 @@ import (
 
 type Bomb struct {
 	Position Position
-	Sprite   *ebiten.Image
+	Asset    assets.Asset
 	Speed    int
 }
 
@@ -17,8 +17,8 @@ func newBomb(x, y, speed int) *Bomb {
 			X: x,
 			Y: y,
 		},
-		Sprite: assets.GetBomb(),
-		Speed:  speed,
+		Asset: assets.GetBomb(),
+		Speed: speed,
 	}
 }
 func (b *Bomb) Update() {
@@ -28,7 +28,7 @@ func (b *Bomb) Update() {
 func (b *Bomb) Draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(b.Position.X), float64(b.Position.Y))
-	screen.DrawImage(b.Sprite, op)
+	screen.DrawImage(b.Asset.Sprite, op)
 }
 
 func filterBombs(bs []*Bomb) []*Bomb {
@@ -39,4 +39,14 @@ func filterBombs(bs []*Bomb) []*Bomb {
 		}
 	}
 	return ret
+}
+
+func (b *Bomb) Collides(p *Player) bool {
+	x1 := b.Position.X
+	y1 := b.Position.Y
+	bounds := b.Asset.Sprite.Bounds()
+	x2 := b.Position.X + bounds.Max.X
+	y2 := b.Position.Y + bounds.Max.Y
+	res := p.Position.X >= x1 && p.Position.X <= x2 && p.Position.Y >= y1 && p.Position.Y <= y2
+	return res
 }

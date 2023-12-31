@@ -13,13 +13,13 @@ type Fleet struct {
 }
 
 type Enemy struct {
-	Sprite   *ebiten.Image
+	Asset    assets.Asset
 	Position Position
 	dead     bool
 }
 
 func newFleet(x, y, leftmost, rightmost int) *Fleet {
-	sprites := []*ebiten.Image{
+	a := []assets.Asset{
 		assets.GetGreen(),
 		assets.GetRed(),
 		assets.GetYellow(),
@@ -33,7 +33,7 @@ func newFleet(x, y, leftmost, rightmost int) *Fleet {
 	for row := 0; row < 4; row++ {
 		for col := 0; col < 10; col++ {
 			e := &Enemy{
-				Sprite: sprites[row],
+				Asset: a[row],
 				Position: Position{
 					X: x + col*50,
 					Y: y + row*50,
@@ -85,7 +85,7 @@ func (f *Fleet) Descend(n int) {
 func (e *Enemy) Draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(e.Position.X), float64(e.Position.Y))
-	screen.DrawImage(e.Sprite, op)
+	screen.DrawImage(e.Asset.Sprite, op)
 }
 
 func (e *Enemy) Update(ml bool) {
@@ -95,14 +95,4 @@ func (e *Enemy) Update(ml bool) {
 	case false:
 		e.Position.X += 1
 	}
-}
-
-func (e *Enemy) Collides(p *Projectile) bool {
-	x1 := e.Position.X
-	y1 := e.Position.Y
-	b := e.Sprite.Bounds()
-	x2 := e.Position.X + b.Max.X
-	y2 := e.Position.Y + b.Max.Y
-	res := p.Position.X >= x1 && p.Position.X <= x2 && p.Position.Y >= y1 && p.Position.Y <= y2
-	return res
 }

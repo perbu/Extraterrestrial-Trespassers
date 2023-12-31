@@ -7,18 +7,18 @@ import (
 
 type Player struct {
 	Position Position
-	Sprite   *ebiten.Image
+	Asset    assets.Asset
 }
 
 func (p *Player) Draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(p.Position.X), float64(p.Position.Y))
-	screen.DrawImage(p.Sprite, op)
+	screen.DrawImage(p.Asset.Sprite, op)
 }
 
 func (p *Player) Shoot() *Projectile {
 	return &Projectile{
-		Sprite: assets.GetProjectile(),
+		Asset: assets.GetProjectile(),
 		Position: Position{
 			X: p.Position.X + 20,
 			Y: p.Position.Y,

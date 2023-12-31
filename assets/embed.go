@@ -4,8 +4,14 @@ import (
 	"bytes"
 	_ "embed"
 	"github.com/hajimehoshi/ebiten/v2"
+	"image"
 	"image/png"
 )
+
+type Asset struct {
+	Sprite *ebiten.Image
+	Bounds image.Rectangle
+}
 
 //go:embed player.png
 var player []byte
@@ -28,66 +34,84 @@ var projectile []byte
 //go:embed bomb.png
 var bomb []byte
 
-func GetPlayer() *ebiten.Image {
+func (a Asset) GetRect() image.Rectangle {
+	return a.Bounds
+}
+
+func GetPlayer() Asset {
 	// load a png file:
 	img, err := png.Decode(bytes.NewReader(player))
 	if err != nil {
 		panic(err)
 	}
-	eimg := ebiten.NewImageFromImage(img)
-	return eimg
+	return Asset{
+		Sprite: ebiten.NewImageFromImage(img),
+		Bounds: img.Bounds(),
+	}
 }
 
-func GetGreen() *ebiten.Image {
+func GetGreen() Asset {
 	img, err := png.Decode(bytes.NewReader(green))
 	if err != nil {
 		panic(err)
 	}
-	eimg := ebiten.NewImageFromImage(img)
-	return eimg
+	return Asset{
+		Sprite: ebiten.NewImageFromImage(img),
+		Bounds: img.Bounds(),
+	}
 }
 
-func GetRed() *ebiten.Image {
+func GetRed() Asset {
 	img, err := png.Decode(bytes.NewReader(red))
 	if err != nil {
 		panic(err)
 	}
-	eimg := ebiten.NewImageFromImage(img)
-	return eimg
+	return Asset{
+		Sprite: ebiten.NewImageFromImage(img),
+		Bounds: img.Bounds(),
+	}
 }
 
-func GetYellow() *ebiten.Image {
+func GetYellow() Asset {
 	img, err := png.Decode(bytes.NewReader(yellow))
 	if err != nil {
 		panic(err)
 	}
-	eimg := ebiten.NewImageFromImage(img)
-	return eimg
+	return Asset{
+		Sprite: ebiten.NewImageFromImage(img),
+		Bounds: img.Bounds(),
+	}
 }
 
-func GetBlue() *ebiten.Image {
+func GetBlue() Asset {
 	img, err := png.Decode(bytes.NewReader(blue))
 	if err != nil {
 		panic(err)
 	}
-	eimg := ebiten.NewImageFromImage(img)
-	return eimg
+	return Asset{
+		Sprite: ebiten.NewImageFromImage(img),
+		Bounds: img.Bounds(),
+	}
 }
 
-func GetProjectile() *ebiten.Image {
+func GetProjectile() Asset {
 	img, err := png.Decode(bytes.NewReader(projectile))
 	if err != nil {
 		panic(err)
 	}
-	eimg := ebiten.NewImageFromImage(img)
-	return eimg
+	return Asset{
+		Sprite: ebiten.NewImageFromImage(img),
+		Bounds: img.Bounds(),
+	}
 }
 
-func GetBomb() *ebiten.Image {
+func GetBomb() Asset {
 	img, err := png.Decode(bytes.NewReader(bomb))
 	if err != nil {
 		panic(err)
 	}
-	eimg := ebiten.NewImageFromImage(img)
-	return eimg
+	return Asset{
+		Sprite: ebiten.NewImageFromImage(img),
+		Bounds: img.Bounds(),
+	}
 }
