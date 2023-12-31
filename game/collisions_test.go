@@ -3,7 +3,6 @@ package game
 import (
 	"github.com/perbu/spaceinvaders/assets"
 	"image"
-	"image/color"
 	"testing"
 )
 
@@ -35,14 +34,3 @@ func TestCollides(t *testing.T) {
 
 	// Additional test cases can be added here.
 }
-
-// Dummy ebiten.Image to satisfy the Asset struct.
-// You should replace this with a proper mock or dummy object as per your setup.
-type dummyImage struct{}
-
-func (d *dummyImage) Dispose()                    {}
-func (d *dummyImage) IsInvalidated() bool         { return false }
-func (d *dummyImage) Size() (int, int)            { return 0, 0 }
-func (d *dummyImage) Bounds() image.Rectangle     { return image.Rect(0, 0, 0, 0) }
-func (d *dummyImage) At(x, y int) color.Color     { return color.RGBA{} }
-func (d *dummyImage) Set(x, y int, c color.Color) {}
