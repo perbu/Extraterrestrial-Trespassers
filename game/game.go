@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
-	"github.com/perbu/spaceinvaders/assets"
+	"github.com/perbu/extraterrestrial_trespassers/assets"
 	"math/rand"
 )
 
 var (
-	gameWidth  = 800
-	gameHeight = 600
+	GameWidth  = 1200
+	GameHeight = 900
 	gameMargin = 50
 )
 
@@ -27,15 +27,15 @@ type Position struct {
 	Y int
 }
 
-func New() *Game {
+func NewGame() *Game {
 	return &Game{
 		Lives:      NewLife(0, 0, 2),
-		AlienFleet: newFleet(0, 30, gameMargin, gameWidth-gameMargin),
+		AlienFleet: newFleet(0, 30, gameMargin, GameWidth-gameMargin),
 		Bombs:      make([]*Bomb, 0, 10),
 		Player: Player{
 			Position: Position{
-				X: gameWidth / 2,
-				Y: gameHeight - 50,
+				X: GameWidth / 2,
+				Y: GameHeight - 50,
 			},
 			Asset: assets.GetPlayer(),
 		},
@@ -49,7 +49,7 @@ func (g *Game) Update() error {
 		}
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyRight) {
-		if g.Player.Position.X < gameWidth-50 {
+		if g.Player.Position.X < GameWidth-50 {
 			g.Player.Position.X += 5
 		}
 	}
@@ -142,5 +142,5 @@ func (g *Game) Draw(screen *ebiten.Image) {
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
-	return gameWidth, gameHeight
+	return GameWidth, GameHeight
 }

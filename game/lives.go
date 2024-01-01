@@ -2,7 +2,7 @@ package game
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/perbu/spaceinvaders/assets"
+	"github.com/perbu/extraterrestrial_trespassers/assets"
 )
 
 type Life struct {

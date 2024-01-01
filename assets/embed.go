@@ -3,7 +3,9 @@ package assets
 import (
 	"bytes"
 	_ "embed"
+	"github.com/golang/freetype/truetype"
 	"github.com/hajimehoshi/ebiten/v2"
+	"golang.org/x/image/font"
 	"image"
 	"image/png"
 )
@@ -33,6 +35,9 @@ var projectile []byte
 
 //go:embed bomb.png
 var bomb []byte
+
+//go:embed PressStart2P-Regular.ttf
+var PressStart2P []byte
 
 func (a Asset) GetRect() image.Rectangle {
 	return a.Bounds
@@ -114,4 +119,15 @@ func GetBomb() Asset {
 		Sprite: ebiten.NewImageFromImage(img),
 		Bounds: img.Bounds(),
 	}
+}
+
+func GetFont(size float64) (font.Face, error) {
+	f, err := truetype.Parse(PressStart2P)
+	if err != nil {
+		return nil, err
+	}
+	face := truetype.NewFace(f, &truetype.Options{
+		Size: size,
+	})
+	return face, nil
 }

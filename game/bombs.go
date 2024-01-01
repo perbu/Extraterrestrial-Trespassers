@@ -2,7 +2,7 @@ package game
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/perbu/spaceinvaders/assets"
+	"github.com/perbu/extraterrestrial_trespassers/assets"
 )
 
 type Bomb struct {
@@ -34,7 +34,7 @@ func (b *Bomb) Draw(screen *ebiten.Image) {
 func filterBombs(bs []*Bomb) []*Bomb {
 	ret := make([]*Bomb, 0)
 	for _, b := range bs {
-		if b.Position.Y < 600 {
+		if b.Position.Y < GameWidth {
 			ret = append(ret, b)
 		}
 	}
