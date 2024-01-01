@@ -1,7 +1,7 @@
 package game
 
 import (
-	"github.com/perbu/spaceinvaders/assets"
+	"github.com/perbu/extraterrestrial_trespassers/assets"
 	"image"
 	"testing"
 )
