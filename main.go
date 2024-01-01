@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/perbu/extraterrestrial_trespassers/game"
 	"github.com/perbu/extraterrestrial_trespassers/intro"
 	"log"
@@ -27,8 +28,10 @@ func main() {
 	// set fullscreen:
 	ebiten.SetFullscreen(true)
 
+	acontext := audio.NewContext(44100)
+
 	app := &App{
-		game:  game.NewGame(),
+		game:  game.NewGame(acontext),
 		intro: intro.NewStarField(),
 		scene: SceneMenu,
 	}

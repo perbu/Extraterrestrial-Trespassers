@@ -3,8 +3,8 @@ package game
 import (
 	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
-	"github.com/perbu/extraterrestrial_trespassers/assets"
 	"math/rand"
 )
 
@@ -27,18 +27,12 @@ type Position struct {
 	Y int
 }
 
-func NewGame() *Game {
+func NewGame(aud *audio.Context) *Game {
 	return &Game{
 		Lives:      NewLife(0, 0, 2),
 		AlienFleet: newFleet(0, 30, gameMargin, GameWidth-gameMargin),
 		Bombs:      make([]*Bomb, 0, 10),
-		Player: Player{
-			Position: Position{
-				X: GameWidth / 2,
-				Y: GameHeight - 50,
-			},
-			Asset: assets.GetPlayer(),
-		},
+		Player:     NewPlayer(aud),
 	}
 }
 
