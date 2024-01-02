@@ -4,6 +4,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/perbu/extraterrestrial_trespassers/assets"
+	"github.com/perbu/extraterrestrial_trespassers/state"
 )
 
 type Player struct {
@@ -12,12 +13,12 @@ type Player struct {
 	ShootPlayer *audio.Player
 }
 
-func NewPlayer(aud *audio.Context) Player {
+func NewPlayer(aud *audio.Context, state *state.Global) Player {
 	shootPlayer, _ := aud.NewPlayer(assets.GetShootSound())
 	return Player{
 		Position: Position{
-			X: GameWidth / 2,
-			Y: GameHeight - 50,
+			X: state.GetHeight() / 2,
+			Y: state.GetHeight() - 50,
 		},
 		Asset:       assets.GetPlayer(),
 		ShootPlayer: shootPlayer,

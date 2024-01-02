@@ -3,6 +3,7 @@ package game
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/perbu/extraterrestrial_trespassers/assets"
+	"github.com/perbu/extraterrestrial_trespassers/state"
 )
 
 type Fleet struct {
@@ -18,17 +19,18 @@ type Enemy struct {
 	dead     bool
 }
 
-func newFleet(x, y, leftmost, rightmost int) *Fleet {
+func newFleet(x, y int, global *state.Global) *Fleet {
 	a := []assets.Asset{
 		assets.GetGreen(),
 		assets.GetRed(),
 		assets.GetYellow(),
 		assets.GetBlue(),
 	}
+	width, _ := global.GetDimensions()
 	f := &Fleet{
 		Enemies:   make([]*Enemy, 0, 40),
-		Leftmost:  leftmost,
-		Rightmost: rightmost,
+		Leftmost:  global.GetMargins(),
+		Rightmost: width - global.GetMargins(),
 	}
 	for row := 0; row < 4; row++ {
 		for col := 0; col < 10; col++ {

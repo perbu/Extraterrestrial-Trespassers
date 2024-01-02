@@ -5,6 +5,7 @@ import (
 	_ "embed"
 	"github.com/golang/freetype/truetype"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/audio/mp3"
 	"github.com/hajimehoshi/ebiten/v2/audio/wav"
 	"golang.org/x/image/font"
 	"image"
@@ -42,6 +43,9 @@ var PressStart2P []byte
 
 //go:embed shoot.wav
 var shootSound []byte
+
+//go:embed intro.mp3
+var song []byte
 
 func (a Asset) GetRect() image.Rectangle {
 	return a.Bounds
@@ -138,5 +142,10 @@ func GetFont(size float64) (font.Face, error) {
 
 func GetShootSound() *wav.Stream {
 	w, _ := wav.DecodeWithSampleRate(44100, bytes.NewReader(shootSound))
+	return w
+}
+
+func GetSong() *mp3.Stream {
+	w, _ := mp3.DecodeWithSampleRate(44100, bytes.NewReader(song))
 	return w
 }

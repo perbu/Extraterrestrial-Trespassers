@@ -3,6 +3,7 @@ package intro
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/perbu/extraterrestrial_trespassers/game"
+	"github.com/perbu/extraterrestrial_trespassers/state"
 	"image/color"
 	"math/rand"
 )
@@ -10,12 +11,14 @@ import (
 type StarField struct {
 	Stars []*Star
 	Menu  *Menu
+	state *state.Global
 }
 
-func NewStarField() *StarField {
+func NewStarField(state *state.Global) *StarField {
 	sf := &StarField{
 		Stars: make([]*Star, 0),
-		Menu:  newMenu(),
+		Menu:  newMenu(state),
+		state: state,
 	}
 
 	for i := 0; i < 800; i++ {
@@ -41,8 +44,8 @@ func NewStarField() *StarField {
 		}
 		sf.Stars = append(sf.Stars, &Star{
 			Position: game.Position{
-				X: rand.Intn(game.GameWidth),
-				Y: rand.Intn(game.GameHeight),
+				X: rand.Intn(sf.state.GetWidth()),
+				Y: rand.Intn(sf.state.GetHeight()),
 			},
 			Speed: speed,
 			Color: col,
@@ -59,7 +62,7 @@ func (sf *StarField) Update() error {
 	}
 	for _, s := range sf.Stars {
 		_ = s.Update()
-		if s.Position.Y > game.GameHeight {
+		if s.Position.Y > sf.state.GetHeight() {
 			// Reset star
 			s.Position.Y = -10
 		}
@@ -74,5 +77,5 @@ func (sf *StarField) Draw(screen *ebiten.Image) {
 	sf.Menu.Draw(screen)
 }
 func (sf *StarField) Layout(outsideWidth, outsideHeight int) (int, int) {
-	return game.GameWidth, game.GameHeight
+	return sf.state.GetDimensions()
 }

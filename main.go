@@ -4,37 +4,36 @@ import (
 	"errors"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
+	"github.com/perbu/extraterrestrial_trespassers/assets"
 	"github.com/perbu/extraterrestrial_trespassers/game"
 	"github.com/perbu/extraterrestrial_trespassers/intro"
+	"github.com/perbu/extraterrestrial_trespassers/state"
 	"log"
-)
-
-type Scene int
-
-const (
-	SceneMenu Scene = iota
-	SceneGame
 )
 
 type App struct {
 	game  *game.Game
 	intro *intro.StarField
-	scene Scene
+	state *state.Global
+	song  *audio.Player
 }
 
 func main() {
-	ebiten.SetWindowSize(game.GameWidth, game.GameHeight)
+	state := state.Initial()
+	ebiten.SetWindowSize(state.GetDimensions())
 	ebiten.SetWindowTitle("Extraterrestrial Trespassers")
 	// set fullscreen:
 	ebiten.SetFullscreen(true)
 
 	acontext := audio.NewContext(44100)
-
+	song, _ := acontext.NewPlayer(assets.GetSong())
 	app := &App{
-		game:  game.NewGame(acontext),
-		intro: intro.NewStarField(),
-		scene: SceneMenu,
+		game:  game.NewGame(acontext, state),
+		intro: intro.NewStarField(state),
+		state: state,
+		song:  song,
 	}
+	song.Play()
 	err := ebiten.RunGame(app)
 	if err != nil {
 		log.Fatal(err)
@@ -42,42 +41,52 @@ func main() {
 }
 
 func (a *App) Update() error {
-	switch a.scene {
-	case SceneMenu:
-		err := a.intro.Update()
-		if err != nil {
-			return err
-		}
-		switch a.intro.Menu.Selection {
-		case intro.Nothing:
+	switch a.state.GetScene() {
+	case state.SceneMenu:
+		action := a.state.ShiftAction()
+		switch action {
+		case state.Nothing:
 			break
-		case intro.StartGame:
-			a.scene = SceneGame
-
-		case intro.Credits:
-			break // not implemented
-		case intro.Quit:
-			return errors.New("Go away")
+		case state.NewGame:
+			a.state.SetScene(state.SceneGame)
+		case state.ShowCredits:
+			a.state.SetScene(state.SceneCredits)
+		case state.Quit:
+			return errors.New("quit")
+		default:
+			panic("unhandled default case")
 		}
-		a.intro.Menu.Selection = intro.Nothing
-	case SceneGame:
-		err := a.game.Update()
-		if err != nil {
-			return err
+		return a.intro.Update()
+	case state.SceneGame:
+		action := a.state.ShiftAction()
+		switch action {
+		case state.Nothing:
+			break
+		case state.GameOver:
+			a.state.SetScene(state.SceneMenu)
+		case state.Quit:
+			return errors.New("quit")
+		default:
+			panic("unhandled default case")
 		}
+		return a.game.Update()
+	case state.SceneCredits:
+		panic("not implemented")
 	}
 	return nil
 }
 
 func (a *App) Draw(screen *ebiten.Image) {
-	switch a.scene {
-	case SceneMenu:
+	switch a.state.GetScene() {
+	case state.SceneMenu:
 		a.intro.Draw(screen)
-	case SceneGame:
+	case state.SceneGame:
 		a.game.Draw(screen)
+	case state.SceneCredits:
+		panic("not implemented")
 	}
 }
 
 func (a *App) Layout(outsideWidth, outsideHeight int) (int, int) {
-	return game.GameWidth, game.GameHeight
+	return a.state.GetDimensions()
 }

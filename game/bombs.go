@@ -31,10 +31,10 @@ func (b *Bomb) Draw(screen *ebiten.Image) {
 	screen.DrawImage(b.Asset.Sprite, op)
 }
 
-func filterBombs(bs []*Bomb) []*Bomb {
+func filterBombs(bs []*Bomb, maxHeight int) []*Bomb {
 	ret := make([]*Bomb, 0)
 	for _, b := range bs {
-		if b.Position.Y < GameWidth {
+		if b.Position.Y < maxHeight {
 			ret = append(ret, b)
 		}
 	}

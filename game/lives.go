@@ -3,22 +3,25 @@ package game
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/perbu/extraterrestrial_trespassers/assets"
+	"github.com/perbu/extraterrestrial_trespassers/state"
 )
 
 type Life struct {
 	Position  Position
 	Asset     assets.Asset
 	NoOfLives int
+	global    *state.Global
 }
 
-func NewLife(x, y, noOfLives int) *Life {
+func NewLife(x, y int, global *state.Global) *Life {
 	return &Life{
 		Position: Position{
 			X: x,
 			Y: y,
 		},
 		Asset:     assets.GetPlayer(),
-		NoOfLives: noOfLives,
+		NoOfLives: 2,
+		global:    global,
 	}
 }
 
@@ -29,4 +32,11 @@ func (l *Life) Draw(screen *ebiten.Image) {
 		op.GeoM.Scale(.5, 0.5)
 		screen.DrawImage(l.Asset.Sprite, op)
 	}
+}
+
+func (l *Life) Die() {
+	if l.NoOfLives == 0 {
+		l.global.QueueAction(state.GameOver)
+	}
+	l.NoOfLives--
 }

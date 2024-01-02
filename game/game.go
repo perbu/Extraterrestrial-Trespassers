@@ -5,13 +5,8 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/perbu/extraterrestrial_trespassers/state"
 	"math/rand"
-)
-
-var (
-	GameWidth  = 1200
-	GameHeight = 900
-	gameMargin = 50
 )
 
 type Game struct {
@@ -20,6 +15,9 @@ type Game struct {
 	Projectiles []*Projectile
 	Bombs       []*Bomb
 	Lives       *Life
+	GameOver    *GameOver
+	GameIsOver  bool
+	state       *state.Global
 }
 
 type Position struct {
@@ -27,23 +25,32 @@ type Position struct {
 	Y int
 }
 
-func NewGame(aud *audio.Context) *Game {
+func NewGame(aud *audio.Context, global *state.Global) *Game {
 	return &Game{
-		Lives:      NewLife(0, 0, 2),
-		AlienFleet: newFleet(0, 30, gameMargin, GameWidth-gameMargin),
+		Lives:      NewLife(0, 0, global),
+		AlienFleet: newFleet(0, 30, global),
 		Bombs:      make([]*Bomb, 0, 10),
-		Player:     NewPlayer(aud),
+		Player:     NewPlayer(aud, global),
+		state:      global,
 	}
 }
 
 func (g *Game) Update() error {
+	if g.GameIsOver {
+		_ = g.GameOver.Update()
+		if g.GameOver.Done {
+
+		}
+		return nil
+	}
+
 	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
 		if g.Player.Position.X > 0 {
 			g.Player.Position.X -= 5
 		}
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyRight) {
-		if g.Player.Position.X < GameWidth-50 {
+		if g.Player.Position.X < g.state.GetWidth()-g.state.GetMargins() {
 			g.Player.Position.X += 5
 		}
 	}
@@ -82,13 +89,13 @@ func (g *Game) Update() error {
 	for _, b := range g.Bombs {
 		b.Update()
 	}
-	g.Bombs = filterBombs(g.Bombs)
+	g.Bombs = filterBombs(g.Bombs, g.state.GetHeight())
 
 	// Check for collisions between bombs and player
 	for _, b := range g.Bombs {
 		if Collides(b.Asset, b.Position, g.Player.Asset, g.Player.Position) {
 			fmt.Println("Player hit by bomb")
-			g.Lives.NoOfLives--
+			g.Lives.Die()
 			b.Position.Y = -10
 
 		}
@@ -106,7 +113,7 @@ func (g *Game) Update() error {
 	for _, e := range g.AlienFleet.Enemies {
 		if Collides(e.Asset, e.Position, g.Player.Asset, g.Player.Position) {
 			fmt.Println("Player hit by enemy")
-			g.Lives.NoOfLives--
+			g.Lives.Die()
 			e.dead = true
 		}
 	}
@@ -136,5 +143,5 @@ func (g *Game) Draw(screen *ebiten.Image) {
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
-	return GameWidth, GameHeight
+	return g.state.GetDimensions()
 }
