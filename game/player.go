@@ -11,10 +11,14 @@ type Player struct {
 	Position    Position
 	Asset       assets.Asset
 	ShootPlayer *audio.Player
+	CrashPlayer *audio.Player
+	global      *state.Global
+	dying       bool
 }
 
 func NewPlayer(aud *audio.Context, state *state.Global) Player {
 	shootPlayer, _ := aud.NewPlayer(assets.GetShootSound())
+	crashPlayer, _ := aud.NewPlayer(assets.GetThud())
 	return Player{
 		Position: Position{
 			X: state.GetHeight() / 2,
@@ -22,6 +26,8 @@ func NewPlayer(aud *audio.Context, state *state.Global) Player {
 		},
 		Asset:       assets.GetPlayer(),
 		ShootPlayer: shootPlayer,
+		CrashPlayer: crashPlayer,
+		global:      state,
 	}
 }
 
@@ -42,4 +48,10 @@ func (p *Player) Shoot() *Projectile {
 		},
 		Speed: 5,
 	}
+}
+
+func (p *Player) Crash() {
+	_ = p.CrashPlayer.Rewind()
+	p.CrashPlayer.Play()
+	p.global.QueueAction(state.PlayerDied)
 }

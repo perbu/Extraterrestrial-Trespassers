@@ -12,6 +12,10 @@ import (
 	"image/png"
 )
 
+const (
+	sampleRate = 44100
+)
+
 type Asset struct {
 	Sprite *ebiten.Image
 	Bounds image.Rectangle
@@ -46,6 +50,9 @@ var shootSound []byte
 
 //go:embed intro.mp3
 var song []byte
+
+//go:embed thud.mp3
+var thud []byte
 
 func (a Asset) GetRect() image.Rectangle {
 	return a.Bounds
@@ -141,11 +148,16 @@ func GetFont(size float64) (font.Face, error) {
 }
 
 func GetShootSound() *wav.Stream {
-	w, _ := wav.DecodeWithSampleRate(44100, bytes.NewReader(shootSound))
+	w, _ := wav.DecodeWithSampleRate(sampleRate, bytes.NewReader(shootSound))
 	return w
 }
 
 func GetSong() *mp3.Stream {
-	w, _ := mp3.DecodeWithSampleRate(44100, bytes.NewReader(song))
+	w, _ := mp3.DecodeWithSampleRate(sampleRate, bytes.NewReader(song))
+	return w
+}
+
+func GetThud() *mp3.Stream {
+	w, _ := mp3.DecodeWithSampleRate(sampleRate, bytes.NewReader(thud))
 	return w
 }

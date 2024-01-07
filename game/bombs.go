@@ -40,13 +40,3 @@ func filterBombs(bs []*Bomb, maxHeight int) []*Bomb {
 	}
 	return ret
 }
-
-func (b *Bomb) Collides(p *Player) bool {
-	x1 := b.Position.X
-	y1 := b.Position.Y
-	bounds := b.Asset.Sprite.Bounds()
-	x2 := b.Position.X + bounds.Max.X
-	y2 := b.Position.Y + bounds.Max.Y
-	res := p.Position.X >= x1 && p.Position.X <= x2 && p.Position.Y >= y1 && p.Position.Y <= y2
-	return res
-}

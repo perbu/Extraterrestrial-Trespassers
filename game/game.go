@@ -7,6 +7,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/perbu/extraterrestrial_trespassers/state"
 	"math/rand"
+	"time"
 )
 
 type Game struct {
@@ -18,6 +19,7 @@ type Game struct {
 	GameOver    *GameOver
 	GameIsOver  bool
 	state       *state.Global
+	freezeUntil time.Time
 }
 
 type Position struct {
@@ -95,6 +97,7 @@ func (g *Game) Update() error {
 	for _, b := range g.Bombs {
 		if Collides(b.Asset, b.Position, g.Player.Asset, g.Player.Position) {
 			fmt.Println("Player hit by bomb")
+			g.Player.Crash()
 			g.Lives.Die()
 			b.Position.Y = -10
 

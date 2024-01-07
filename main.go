@@ -9,13 +9,15 @@ import (
 	"github.com/perbu/extraterrestrial_trespassers/intro"
 	"github.com/perbu/extraterrestrial_trespassers/state"
 	"log"
+	"time"
 )
 
 type App struct {
-	game  *game.Game
-	intro *intro.StarField
-	state *state.Global
-	song  *audio.Player
+	game        *game.Game
+	intro       *intro.StarField
+	state       *state.Global
+	song        *audio.Player
+	freezeUntil time.Time
 }
 
 func main() {
@@ -41,8 +43,20 @@ func main() {
 }
 
 func (a *App) Update() error {
+
+	if a.song.IsPlaying() == false {
+		a.song.Rewind()
+		a.song.Play()
+	}
+
+	// If freezeUntil is in the future, we are frozen and no updates should be made.
+	if time.Now().Before(a.freezeUntil) {
+		return nil
+	}
+
 	switch a.state.GetScene() {
 	case state.SceneMenu:
+		a.song.SetVolume(1.0)
 		action := a.state.ShiftAction()
 		switch action {
 		case state.Nothing:
@@ -58,6 +72,7 @@ func (a *App) Update() error {
 		}
 		return a.intro.Update()
 	case state.SceneGame:
+		a.song.SetVolume(0.5)
 		action := a.state.ShiftAction()
 		switch action {
 		case state.Nothing:
@@ -66,6 +81,8 @@ func (a *App) Update() error {
 			a.state.SetScene(state.SceneMenu)
 		case state.Quit:
 			return errors.New("quit")
+		case state.PlayerDied:
+			a.freezeUntil = time.Now().Add(2 * time.Second)
 		default:
 			panic("unhandled default case")
 		}

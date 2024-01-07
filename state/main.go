@@ -27,6 +27,7 @@ const (
 	NewGame
 	ShowCredits
 	GameOver
+	PlayerDied
 )
 
 func Initial() *Global {
