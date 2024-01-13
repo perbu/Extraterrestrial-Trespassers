@@ -9,7 +9,7 @@ import (
 
 type StarField struct {
 	Stars []*star
-	Menu  *menu
+	Menu  *intro
 	state *state.Global
 }
 

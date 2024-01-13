@@ -10,26 +10,53 @@ import (
 	"image/color"
 )
 
-type menu struct {
+type intro struct {
 	menuOptions      []string
 	currentSelection int
 	face             font.Face
 	state            *state.Global
+	mode             mode
 }
 
-func newMenu(state *state.Global) *menu {
+type mode int
+
+const (
+	menu mode = iota
+	credits
+)
+
+func newMenu(state *state.Global) *intro {
 	face, err := assets.GetFont(24)
 	if err != nil {
 		panic(err)
 	}
-	return &menu{
+	return &intro{
 		menuOptions: []string{"Start Game", "Credits", "Quit"},
 		face:        face,
 		state:       state,
 	}
 }
 
-func (g *menu) Update() error {
+func (g *intro) Update() error {
+	if g.mode == credits {
+		if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+			g.mode = menu
+		}
+		return nil
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
+		switch g.currentSelection {
+		case 0:
+			g.state.QueueAction(state.NewGame)
+		case 1:
+			g.mode = credits
+			return nil
+		case 2:
+			g.state.QueueAction(state.Quit)
+		}
+	}
+
 	if inpututil.IsKeyJustPressed(ebiten.KeyArrowUp) {
 		if g.currentSelection > 0 {
 			g.currentSelection--
@@ -40,22 +67,15 @@ func (g *menu) Update() error {
 			g.currentSelection++
 		}
 	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
-		switch g.currentSelection {
-		case 0:
-			g.state.QueueAction(state.NewGame)
-		case 1:
-			g.state.QueueAction(state.ShowCredits)
-		case 2:
-			g.state.QueueAction(state.Quit)
-		}
-	}
-	// Add logic here for when an option is selected (e.g., pressing Enter)
-
 	return nil
 }
 
-func (g *menu) Draw(screen *ebiten.Image) {
+func (g *intro) Draw(screen *ebiten.Image) {
+	if g.mode == credits {
+		text.Draw(screen, "Credits", g.face, 100, 100, color.White)
+		text.Draw(screen, "perbu", g.face, 100, 200, color.White)
+		return
+	}
 	for i, option := range g.menuOptions {
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(g.state.GetWidth()/2-len(option)*4), float64(100+i*20))
@@ -71,6 +91,6 @@ func (g *menu) Draw(screen *ebiten.Image) {
 	}
 }
 
-func (g *menu) Layout(outsideWidth, outsideHeight int) (int, int) {
+func (g *intro) Layout(outsideWidth, outsideHeight int) (int, int) {
 	return g.state.GetDimensions()
 }
