@@ -16,6 +16,7 @@ type Game struct {
 	bombs       []*bomb
 	lives       *lives
 	state       *state.Global
+	particles   []*particle
 }
 
 type position struct {
@@ -30,6 +31,7 @@ func NewGame(aud *audio.Context, global *state.Global) *Game {
 	g.bombs = make([]*bomb, 0, 10)
 	g.player = NewPlayer(aud, global, g)
 	g.state = global
+	g.particles = make([]*particle, 0)
 	return g
 }
 
@@ -52,6 +54,16 @@ func (g *Game) Update() error {
 	g.alienFleet.Update()
 	g.projectiles = filterProjectiles(g.projectiles)
 
+	// update the particles:
+	for i, p := range g.particles {
+		p.Update()
+		// check if the particle is within bounds:
+		if !g.withinBounds(p.position) {
+			// remove the particle from the slice
+			g.particles = removeElement(g.particles, i)
+		}
+	}
+
 	// Check for collisions between projectiles and enemies
 	for _, e := range g.alienFleet.enemies {
 		for _, p := range g.projectiles {
@@ -60,6 +72,9 @@ func (g *Game) Update() error {
 				p.position.Y = -10
 				// remove the enemy from the fleet:
 				e.dead = true
+				for i := 0; i < 50; i++ {
+					g.particles = append(g.particles, newParticle(e.position))
+				}
 			}
 		}
 	}
@@ -128,8 +143,19 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	for _, b := range g.bombs {
 		b.Draw(screen)
 	}
+	for _, p := range g.particles {
+		p.Draw(screen)
+	}
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 	return g.state.GetDimensions()
+}
+
+func removeElement[T any](s []T, index int) []T {
+	if index < 0 || index >= len(s) {
+		// If the index is out of range, return the original slice
+		return s
+	}
+	return append(s[:index], s[index+1:]...)
 }
