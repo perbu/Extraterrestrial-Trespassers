@@ -14,17 +14,8 @@ type menu struct {
 	menuOptions      []string
 	currentSelection int
 	face             font.Face
-	selection        selection
 	state            *state.Global
 }
-type selection int
-
-const (
-	Nothing selection = iota
-	StartGame
-	Credits
-	Quit
-)
 
 func newMenu(state *state.Global) *menu {
 	face, err := assets.GetFont(24)

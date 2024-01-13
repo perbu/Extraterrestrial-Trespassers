@@ -64,7 +64,7 @@ func (p *player) Draw(screen *ebiten.Image) {
 }
 
 func (p *player) Shoot() {
-	p.shootPlayer.Rewind()
+	_ = p.shootPlayer.Rewind()
 	p.shootPlayer.Play()
 	proj := &projectile{
 		asset: assets.GetProjectile(),

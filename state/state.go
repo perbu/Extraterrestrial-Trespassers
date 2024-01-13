@@ -13,8 +13,6 @@ type Global struct {
 	scene       Scene
 	actions     []Action // queue of actions to be processed
 	freezeUntil time.Time
-	lives       int
-	dead        bool // player is dead
 }
 
 type Scene int
@@ -111,12 +109,6 @@ func (g *Global) FreezeUntil(t time.Time) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 	g.freezeUntil = t
-}
-
-// isFrozen returns true if the freezeUntil time is in the future
-// doesn't lock the mutex
-func (g *Global) isFrozen() bool {
-	return g.freezeUntil.After(time.Now())
 }
 
 func (g *Global) IsFrozen() bool {

@@ -43,8 +43,8 @@ func main() {
 
 func (a *App) Update() error {
 
-	if a.song.IsPlaying() == false {
-		a.song.Rewind()
+	if !a.song.IsPlaying() {
+		_ = a.song.Rewind()
 		a.song.Play()
 	}
 	// is global state update returns true, we should abort the update,
