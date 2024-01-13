@@ -1,14 +1,20 @@
 package state
 
-import "sync"
+import (
+	"sync"
+	"time"
+)
 
 type Global struct {
-	mu      sync.Mutex
-	width   int
-	height  int
-	margins int
-	scene   Scene
-	actions []Action // queue of actions to be processed
+	mu          sync.Mutex
+	width       int
+	height      int
+	margins     int
+	scene       Scene
+	actions     []Action // queue of actions to be processed
+	freezeUntil time.Time
+	lives       int
+	dead        bool // player is dead
 }
 
 type Scene int
@@ -21,14 +27,18 @@ const (
 
 type Action int
 
+// These are the global actions that can be queued. They're all affecting the global state of the game.
+// Other events are handled locally.
 const (
 	Nothing Action = iota
 	Quit
 	NewGame
 	ShowCredits
 	GameOver
-	PlayerDied
 )
+
+// make strings:
+//go:generate stringer -type=Action
 
 func Initial() *Global {
 	return &Global{
@@ -37,6 +47,11 @@ func Initial() *Global {
 		margins: 50,
 		scene:   SceneMenu,
 	}
+}
+
+func (g *Global) Update() bool {
+	// don't update the game if we are frozen
+	return g.IsFrozen()
 }
 
 func (g *Global) QueueAction(action Action) {
@@ -90,4 +105,22 @@ func (g *Global) GetMargins() int {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 	return g.margins
+}
+
+func (g *Global) FreezeUntil(t time.Time) {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	g.freezeUntil = t
+}
+
+// isFrozen returns true if the freezeUntil time is in the future
+// doesn't lock the mutex
+func (g *Global) isFrozen() bool {
+	return g.freezeUntil.After(time.Now())
+}
+
+func (g *Global) IsFrozen() bool {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	return g.freezeUntil.After(time.Now())
 }

@@ -3,40 +3,54 @@ package game
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/perbu/extraterrestrial_trespassers/assets"
-	"github.com/perbu/extraterrestrial_trespassers/state"
+	"sync"
 )
 
-type Life struct {
-	Position  Position
-	Asset     assets.Asset
-	NoOfLives int
-	global    *state.Global
+type Lives struct {
+	position Position
+	asset    assets.Asset
+	game     *Game
+	lives    int
+	mu       sync.Mutex
 }
 
-func NewLife(x, y int, global *state.Global) *Life {
-	return &Life{
-		Position: Position{
+func NewLife(x, y int, game *Game) *Lives {
+	return &Lives{
+		position: Position{
 			X: x,
 			Y: y,
 		},
-		Asset:     assets.GetPlayer(),
-		NoOfLives: 2,
-		global:    global,
+		asset: assets.GetPlayer(),
+		game:  game,
+		lives: 2,
 	}
 }
 
-func (l *Life) Draw(screen *ebiten.Image) {
-	for i := 0; i < l.NoOfLives; i++ {
+func (l *Lives) Draw(screen *ebiten.Image) {
+	lives := l.lives
+	for i := 0; i < lives; i++ {
 		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(float64(l.Position.X+i*100), float64(l.Position.Y))
+		op.GeoM.Translate(float64(l.position.X+i*100), float64(l.position.Y))
 		op.GeoM.Scale(.5, 0.5)
-		screen.DrawImage(l.Asset.Sprite, op)
+		screen.DrawImage(l.asset.Sprite, op)
 	}
 }
 
-func (l *Life) Die() {
-	if l.NoOfLives == 0 {
-		l.global.QueueAction(state.GameOver)
-	}
-	l.NoOfLives--
+func (l *Lives) GetLives() int {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	return l.lives
+}
+
+func (l *Lives) SetLives(lives int) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	l.lives = lives
+}
+
+func (l *Lives) DecrementLives() int {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	l.lives--
+	return l.lives
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/perbu/extraterrestrial_trespassers/assets"
@@ -9,20 +10,18 @@ import (
 	"github.com/perbu/extraterrestrial_trespassers/intro"
 	"github.com/perbu/extraterrestrial_trespassers/state"
 	"log"
-	"time"
 )
 
 type App struct {
-	game        *game.Game
-	intro       *intro.StarField
-	state       *state.Global
-	song        *audio.Player
-	freezeUntil time.Time
+	game  *game.Game
+	intro *intro.StarField
+	state *state.Global
+	song  *audio.Player
 }
 
 func main() {
-	state := state.Initial()
-	ebiten.SetWindowSize(state.GetDimensions())
+	s := state.Initial()
+	ebiten.SetWindowSize(s.GetDimensions())
 	ebiten.SetWindowTitle("Extraterrestrial Trespassers")
 	// set fullscreen:
 	ebiten.SetFullscreen(true)
@@ -30,9 +29,9 @@ func main() {
 	acontext := audio.NewContext(44100)
 	song, _ := acontext.NewPlayer(assets.GetSong())
 	app := &App{
-		game:  game.NewGame(acontext, state),
-		intro: intro.NewStarField(state),
-		state: state,
+		game:  game.NewGame(acontext, s),
+		intro: intro.NewStarField(s),
+		state: s,
 		song:  song,
 	}
 	song.Play()
@@ -48,9 +47,9 @@ func (a *App) Update() error {
 		a.song.Rewind()
 		a.song.Play()
 	}
-
-	// If freezeUntil is in the future, we are frozen and no updates should be made.
-	if time.Now().Before(a.freezeUntil) {
+	// is global state update returns true, we should abort the update,
+	// since we are in a transition state.
+	if a.state.Update() {
 		return nil
 	}
 
@@ -67,8 +66,10 @@ func (a *App) Update() error {
 			a.state.SetScene(state.SceneCredits)
 		case state.Quit:
 			return errors.New("quit")
+		case state.GameOver:
+			a.state.SetScene(state.SceneMenu)
 		default:
-			panic("unhandled default case")
+			fmt.Println("unhandled action:", action.String())
 		}
 		return a.intro.Update()
 	case state.SceneGame:
@@ -81,8 +82,6 @@ func (a *App) Update() error {
 			a.state.SetScene(state.SceneMenu)
 		case state.Quit:
 			return errors.New("quit")
-		case state.PlayerDied:
-			a.freezeUntil = time.Now().Add(2 * time.Second)
 		default:
 			panic("unhandled default case")
 		}
