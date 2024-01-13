@@ -7,7 +7,7 @@ import (
 )
 
 type GameOver struct {
-	Position Position
+	Position position
 	Text     string
 	Face     font.Face
 	Done     bool
@@ -29,7 +29,7 @@ func NewGameOver(state *state.Global) *GameOver {
 		panic(err)
 	}
 	return &GameOver{
-		Position: Position{X: state.GetWidth()/2 - 100, Y: 0},
+		Position: position{X: state.GetWidth()/2 - 100, Y: 0},
 		Text:     "Game Over",
 		Face:     face,
 		state:    state,

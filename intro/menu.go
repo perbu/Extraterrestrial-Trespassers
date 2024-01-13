@@ -10,35 +10,35 @@ import (
 	"image/color"
 )
 
-type Menu struct {
+type menu struct {
 	menuOptions      []string
 	currentSelection int
 	face             font.Face
-	Selection        Selection
+	selection        selection
 	state            *state.Global
 }
-type Selection int
+type selection int
 
 const (
-	Nothing Selection = iota
+	Nothing selection = iota
 	StartGame
 	Credits
 	Quit
 )
 
-func newMenu(state *state.Global) *Menu {
+func newMenu(state *state.Global) *menu {
 	face, err := assets.GetFont(24)
 	if err != nil {
 		panic(err)
 	}
-	return &Menu{
+	return &menu{
 		menuOptions: []string{"Start Game", "Credits", "Quit"},
 		face:        face,
 		state:       state,
 	}
 }
 
-func (g *Menu) Update() error {
+func (g *menu) Update() error {
 	if inpututil.IsKeyJustPressed(ebiten.KeyArrowUp) {
 		if g.currentSelection > 0 {
 			g.currentSelection--
@@ -64,7 +64,7 @@ func (g *Menu) Update() error {
 	return nil
 }
 
-func (g *Menu) Draw(screen *ebiten.Image) {
+func (g *menu) Draw(screen *ebiten.Image) {
 	for i, option := range g.menuOptions {
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(g.state.GetWidth()/2-len(option)*4), float64(100+i*20))
@@ -80,6 +80,6 @@ func (g *Menu) Draw(screen *ebiten.Image) {
 	}
 }
 
-func (g *Menu) Layout(outsideWidth, outsideHeight int) (int, int) {
+func (g *menu) Layout(outsideWidth, outsideHeight int) (int, int) {
 	return g.state.GetDimensions()
 }

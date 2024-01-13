@@ -6,20 +6,20 @@ import (
 	"github.com/perbu/extraterrestrial_trespassers/state"
 )
 
-type Fleet struct {
-	Enemies    []*Enemy
-	MovingLeft bool
-	Leftmost   int
-	Rightmost  int
+type fleet struct {
+	enemies    []*enemy
+	movingLeft bool
+	leftMost   int
+	rightMost  int
 }
 
-type Enemy struct {
-	Asset    assets.Asset
-	Position Position
+type enemy struct {
+	asset    assets.Asset
+	position position
 	dead     bool
 }
 
-func newFleet(x, y int, global *state.Global) *Fleet {
+func newFleet(x, y int, global *state.Global) *fleet {
 	a := []assets.Asset{
 		assets.GetGreen(),
 		assets.GetRed(),
@@ -27,74 +27,74 @@ func newFleet(x, y int, global *state.Global) *Fleet {
 		assets.GetBlue(),
 	}
 	width, _ := global.GetDimensions()
-	f := &Fleet{
-		Enemies:   make([]*Enemy, 0, 40),
-		Leftmost:  global.GetMargins(),
-		Rightmost: width - global.GetMargins(),
+	f := &fleet{
+		enemies:   make([]*enemy, 0, 40),
+		leftMost:  global.GetMargins(),
+		rightMost: width - global.GetMargins(),
 	}
 	for row := 0; row < 4; row++ {
 		for col := 0; col < 10; col++ {
-			e := &Enemy{
-				Asset: a[row],
-				Position: Position{
+			e := &enemy{
+				asset: a[row],
+				position: position{
 					X: x + col*50,
 					Y: y + row*50,
 				},
 			}
-			f.Enemies = append(f.Enemies, e)
+			f.enemies = append(f.enemies, e)
 		}
 	}
 	return f
 }
 
-func (f *Fleet) Draw(screen *ebiten.Image) {
-	for _, e := range f.Enemies {
+func (f *fleet) Draw(screen *ebiten.Image) {
+	for _, e := range f.enemies {
 		e.Draw(screen)
 	}
 }
 
-func (f *Fleet) Update() {
-	switch f.MovingLeft {
+func (f *fleet) Update() {
+	switch f.movingLeft {
 	case true:
-		for _, e := range f.Enemies {
-			if e.Position.X <= f.Leftmost {
-				f.MovingLeft = false
+		for _, e := range f.enemies {
+			if e.position.X <= f.leftMost {
+				f.movingLeft = false
 				f.Descend(10)
 				break
 			}
 		}
 	case false:
-		for _, e := range f.Enemies {
-			if e.Position.X >= f.Rightmost {
-				f.MovingLeft = true
+		for _, e := range f.enemies {
+			if e.position.X >= f.rightMost {
+				f.movingLeft = true
 				f.Descend(10)
 				break
 			}
 		}
 	}
 
-	for _, e := range f.Enemies {
-		e.Update(f.MovingLeft)
+	for _, e := range f.enemies {
+		e.Update(f.movingLeft)
 	}
 }
 
-func (f *Fleet) Descend(n int) {
-	for _, e := range f.Enemies {
-		e.Position.Y += n
+func (f *fleet) Descend(n int) {
+	for _, e := range f.enemies {
+		e.position.Y += n
 	}
 }
 
-func (e *Enemy) Draw(screen *ebiten.Image) {
+func (e *enemy) Draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(float64(e.Position.X), float64(e.Position.Y))
-	screen.DrawImage(e.Asset.Sprite, op)
+	op.GeoM.Translate(float64(e.position.X), float64(e.position.Y))
+	screen.DrawImage(e.asset.Sprite, op)
 }
 
-func (e *Enemy) Update(ml bool) {
+func (e *enemy) Update(ml bool) {
 	switch ml {
 	case true:
-		e.Position.X -= 1
+		e.position.X -= 1
 	case false:
-		e.Position.X += 1
+		e.position.X += 1
 	}
 }

@@ -10,108 +10,106 @@ import (
 )
 
 type Game struct {
-	Player      Player
-	AlienFleet  *Fleet
-	Projectiles []*Projectile
-	Bombs       []*Bomb
-	Lives       *Lives
-	GameOver    *GameOver
-	GameIsOver  bool
+	player      player
+	alienFleet  *fleet
+	projectiles []*projectile
+	bombs       []*bomb
+	lives       *lives
 	state       *state.Global
 }
 
-type Position struct {
+type position struct {
 	X int
 	Y int
 }
 
 func NewGame(aud *audio.Context, global *state.Global) *Game {
 	g := &Game{}
-	g.Lives = NewLife(0, 0, g)
-	g.AlienFleet = newFleet(0, 30, global)
-	g.Bombs = make([]*Bomb, 0, 10)
-	g.Player = NewPlayer(aud, global, g)
+	g.lives = NewLife(0, 0, g)
+	g.alienFleet = newFleet(0, 30, global)
+	g.bombs = make([]*bomb, 0, 10)
+	g.player = NewPlayer(aud, global, g)
 	g.state = global
 	return g
 }
 
 func (g *Game) Update() error {
-	if g.Player.dead {
-		if g.Lives.GetLives() < 0 {
+	if g.player.dead {
+		if g.lives.GetLives() < 0 {
 			g.state.QueueAction(state.GameOver)
 			return nil
 		}
-		g.Player.Respawn()
+		g.player.Respawn()
 		// freeze the game for 2 seconds
 		g.state.FreezeUntil(time.Now().Add(2 * time.Second))
-		g.Player.dead = false
+		g.player.dead = false
 	}
 
-	g.Player.Update()
-	for _, p := range g.Projectiles {
+	g.player.Update()
+	for _, p := range g.projectiles {
 		p.Update()
 	}
-	g.AlienFleet.Update()
-	g.Projectiles = filterProjectiles(g.Projectiles)
+	g.alienFleet.Update()
+	g.projectiles = filterProjectiles(g.projectiles)
 
 	// Check for collisions between projectiles and enemies
-	for _, e := range g.AlienFleet.Enemies {
-		for _, p := range g.Projectiles {
-			if Collides(e.Asset, e.Position, p.Asset, p.Position) {
+	for _, e := range g.alienFleet.enemies {
+		for _, p := range g.projectiles {
+			if collides(e.asset, e.position, p.asset, p.position) {
 				// remove the projectile from the screen
-				p.Position.Y = -10
+				p.position.Y = -10
 				// remove the enemy from the fleet:
 				e.dead = true
 			}
 		}
 	}
 	// remove dead enemies from the fleet
-	g.AlienFleet.Enemies = filterEnemies(g.AlienFleet.Enemies)
+	g.alienFleet.enemies = filterEnemies(g.alienFleet.enemies)
 
 	// Drop the bombs:
-	for _, e := range g.AlienFleet.Enemies {
+	for _, e := range g.alienFleet.enemies {
 		// 1% chance of dropping a bomb
 		if rand.Intn(1000) == 1 {
-			b := newBomb(e.Position.X, e.Position.Y, 5)
-			g.Bombs = append(g.Bombs, b)
+			b := newBomb(e.position.X, e.position.Y, 5)
+			g.bombs = append(g.bombs, b)
 		}
 	}
-	for _, b := range g.Bombs {
+	for _, b := range g.bombs {
 		b.Update()
 	}
-	g.Bombs = filterBombs(g.Bombs, g.state.GetHeight())
+	g.bombs = filterBombs(g.bombs, g.state.GetHeight())
 
 	// Check for collisions between bombs and player
-	for _, b := range g.Bombs {
-		if Collides(b.Asset, b.Position, g.Player.Asset, g.Player.Position) {
-			fmt.Println("Player hit by bomb")
-			g.Player.Collision()
-			b.Position.Y = -10
+	for _, b := range g.bombs {
+		if collides(b.asset, b.position, g.player.asset, g.player.position) {
+			fmt.Println("player hit by bomb")
+			g.player.Collision()
+			b.position.Y = -10
 
 		}
 	}
 	// check for collisions between bombs and projectiles
-	for _, b := range g.Bombs {
-		for _, p := range g.Projectiles {
-			if Collides(b.Asset, b.Position, p.Asset, p.Position) {
-				b.Position.Y = -10
-				p.Position.Y = -10
+	for _, b := range g.bombs {
+		for _, p := range g.projectiles {
+			if collides(b.asset, b.position, p.asset, p.position) {
+				b.position.Y = -10
+				p.position.Y = -10
 			}
 		}
 	}
 	// check for collisions between player and enemies:
-	for _, e := range g.AlienFleet.Enemies {
-		if Collides(e.Asset, e.Position, g.Player.Asset, g.Player.Position) {
-			fmt.Println("Player hit by enemy")
-			g.Player.Collision()
+	for _, e := range g.alienFleet.enemies {
+		if collides(e.asset, e.position, g.player.asset, g.player.position) {
+			fmt.Println("player hit by enemy")
+			g.player.Collision()
 			e.dead = true
 		}
 	}
 	return nil
 }
 
-func filterEnemies(enemies []*Enemy) []*Enemy {
-	var filtered []*Enemy
+func filterEnemies(enemies []*enemy) []*enemy {
+	var filtered []*enemy
 	for _, e := range enemies {
 		if !e.dead {
 			filtered = append(filtered, e)
@@ -121,13 +119,13 @@ func filterEnemies(enemies []*Enemy) []*Enemy {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	g.Lives.Draw(screen)
-	g.Player.Draw(screen)
-	for _, p := range g.Projectiles {
+	g.lives.Draw(screen)
+	g.player.Draw(screen)
+	for _, p := range g.projectiles {
 		p.Draw(screen)
 	}
-	g.AlienFleet.Draw(screen)
-	for _, b := range g.Bombs {
+	g.alienFleet.Draw(screen)
+	for _, b := range g.bombs {
 		b.Draw(screen)
 	}
 }

@@ -2,21 +2,20 @@ package intro
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/perbu/extraterrestrial_trespassers/game"
 	"github.com/perbu/extraterrestrial_trespassers/state"
 	"image/color"
 	"math/rand"
 )
 
 type StarField struct {
-	Stars []*Star
-	Menu  *Menu
+	Stars []*star
+	Menu  *menu
 	state *state.Global
 }
 
 func NewStarField(state *state.Global) *StarField {
 	sf := &StarField{
-		Stars: make([]*Star, 0),
+		Stars: make([]*star, 0),
 		Menu:  newMenu(state),
 		state: state,
 	}
@@ -42,14 +41,14 @@ func NewStarField(state *state.Global) *StarField {
 			col = color.RGBA{R: 50, G: 50, B: 50, A: 255}
 			size = 1
 		}
-		sf.Stars = append(sf.Stars, &Star{
-			Position: game.Position{
+		sf.Stars = append(sf.Stars, &star{
+			position: position{
 				X: rand.Intn(sf.state.GetWidth()),
 				Y: rand.Intn(sf.state.GetHeight()),
 			},
-			Speed: speed,
-			Color: col,
-			Size:  size,
+			speed: speed,
+			color: col,
+			size:  size,
 		})
 	}
 	return sf
@@ -62,9 +61,9 @@ func (sf *StarField) Update() error {
 	}
 	for _, s := range sf.Stars {
 		_ = s.Update()
-		if s.Position.Y > sf.state.GetHeight() {
+		if s.position.Y > sf.state.GetHeight() {
 			// Reset star
-			s.Position.Y = -10
+			s.position.Y = -10
 		}
 	}
 	return nil

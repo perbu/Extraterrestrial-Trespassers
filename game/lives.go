@@ -6,17 +6,17 @@ import (
 	"sync"
 )
 
-type Lives struct {
-	position Position
+type lives struct {
+	position position
 	asset    assets.Asset
 	game     *Game
 	lives    int
 	mu       sync.Mutex
 }
 
-func NewLife(x, y int, game *Game) *Lives {
-	return &Lives{
-		position: Position{
+func NewLife(x, y int, game *Game) *lives {
+	return &lives{
+		position: position{
 			X: x,
 			Y: y,
 		},
@@ -26,7 +26,7 @@ func NewLife(x, y int, game *Game) *Lives {
 	}
 }
 
-func (l *Lives) Draw(screen *ebiten.Image) {
+func (l *lives) Draw(screen *ebiten.Image) {
 	lives := l.lives
 	for i := 0; i < lives; i++ {
 		op := &ebiten.DrawImageOptions{}
@@ -36,19 +36,19 @@ func (l *Lives) Draw(screen *ebiten.Image) {
 	}
 }
 
-func (l *Lives) GetLives() int {
+func (l *lives) GetLives() int {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	return l.lives
 }
 
-func (l *Lives) SetLives(lives int) {
+func (l *lives) SetLives(lives int) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	l.lives = lives
 }
 
-func (l *Lives) DecrementLives() int {
+func (l *lives) DecrementLives() int {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	l.lives--

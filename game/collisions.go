@@ -5,8 +5,8 @@ import (
 	"image"
 )
 
-// Collides takes two assets and their positions and returns true if they collide.
-func Collides(aAsset assets.Asset, aPosition Position, bAsset assets.Asset, bPosition Position) bool {
+// collides takes two assets and their positions and returns true if they collide.
+func collides(aAsset assets.Asset, aPosition position, bAsset assets.Asset, bPosition position) bool {
 	// Adjust the bounds of each asset by their positions.
 	aBounds := image.Rect(
 		aAsset.Bounds.Min.X+aPosition.X,

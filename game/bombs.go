@@ -5,36 +5,36 @@ import (
 	"github.com/perbu/extraterrestrial_trespassers/assets"
 )
 
-type Bomb struct {
-	Position Position
-	Asset    assets.Asset
-	Speed    int
+type bomb struct {
+	position position
+	asset    assets.Asset
+	speed    int
 }
 
-func newBomb(x, y, speed int) *Bomb {
-	return &Bomb{
-		Position: Position{
+func newBomb(x, y, speed int) *bomb {
+	return &bomb{
+		position: position{
 			X: x,
 			Y: y,
 		},
-		Asset: assets.GetBomb(),
-		Speed: speed,
+		asset: assets.GetBomb(),
+		speed: speed,
 	}
 }
-func (b *Bomb) Update() {
-	b.Position.Y += b.Speed
+func (b *bomb) Update() {
+	b.position.Y += b.speed
 }
 
-func (b *Bomb) Draw(screen *ebiten.Image) {
+func (b *bomb) Draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(float64(b.Position.X), float64(b.Position.Y))
-	screen.DrawImage(b.Asset.Sprite, op)
+	op.GeoM.Translate(float64(b.position.X), float64(b.position.Y))
+	screen.DrawImage(b.asset.Sprite, op)
 }
 
-func filterBombs(bs []*Bomb, maxHeight int) []*Bomb {
-	ret := make([]*Bomb, 0)
+func filterBombs(bs []*bomb, maxHeight int) []*bomb {
+	ret := make([]*bomb, 0)
 	for _, b := range bs {
-		if b.Position.Y < maxHeight {
+		if b.position.Y < maxHeight {
 			ret = append(ret, b)
 		}
 	}
