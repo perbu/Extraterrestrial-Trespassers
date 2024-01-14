@@ -14,17 +14,27 @@ type fleet struct {
 }
 
 type enemy struct {
-	asset    assets.Asset
-	position position
-	dead     bool
+	asset     assets.Asset
+	position  position
+	dead      bool
+	enemyType enemyType
 }
+
+type enemyType int
+
+const (
+	enemyGreen enemyType = iota
+	enemyRed
+	enemyYellow
+	enemyCyan
+)
 
 func newFleet(x, y int, global *state.Global) *fleet {
 	a := []assets.Asset{
 		assets.GetGreen(),
 		assets.GetRed(),
 		assets.GetYellow(),
-		assets.GetBlue(),
+		assets.GetCyan(),
 	}
 	width, _ := global.GetDimensions()
 	f := &fleet{
@@ -35,7 +45,8 @@ func newFleet(x, y int, global *state.Global) *fleet {
 	for row := 0; row < 4; row++ {
 		for col := 0; col < 10; col++ {
 			e := &enemy{
-				asset: a[row],
+				enemyType: enemyType(row),
+				asset:     a[row],
 				position: position{
 					X: x + col*50,
 					Y: y + row*50,

@@ -33,7 +33,7 @@ var red []byte
 //go:embed yellow.png
 var yellow []byte
 
-//go:embed blue.png
+//go:embed cyan.png
 var blue []byte
 
 //go:embed projectile.png
@@ -103,7 +103,7 @@ func GetYellow() Asset {
 	}
 }
 
-func GetBlue() Asset {
+func GetCyan() Asset {
 	img, err := png.Decode(bytes.NewReader(blue))
 	if err != nil {
 		panic(err)

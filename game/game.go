@@ -5,6 +5,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/perbu/extraterrestrial_trespassers/state"
+	"image/color"
 	"math/rand"
 	"time"
 )
@@ -62,6 +63,9 @@ func (g *Game) Update() error {
 			// remove the particle from the slice
 			g.particles = removeElement(g.particles, i)
 		}
+		if p.age() > particleLifeTime {
+			g.particles = removeElement(g.particles, i)
+		}
 	}
 
 	// Check for collisions between projectiles and enemies
@@ -72,8 +76,21 @@ func (g *Game) Update() error {
 				p.position.Y = -10
 				// remove the enemy from the fleet:
 				e.dead = true
-				for i := 0; i < 50; i++ {
-					g.particles = append(g.particles, newParticle(e.position))
+				var pcolor color.Color
+				// check what type of enemy was hit:
+
+				switch e.enemyType {
+				case enemyGreen:
+					pcolor = color.RGBA{R: 0, G: 255, B: 0, A: 255}
+				case enemyRed:
+					pcolor = color.RGBA{R: 255, G: 0, B: 0, A: 255}
+				case enemyYellow:
+					pcolor = color.RGBA{R: 255, G: 255, B: 0, A: 255}
+				case enemyCyan:
+					pcolor = color.RGBA{R: 0, G: 255, B: 255, A: 255}
+				}
+				for i := 0; i < 100; i++ {
+					g.particles = append(g.particles, newParticle(e.position, pcolor))
 				}
 			}
 		}
