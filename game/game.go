@@ -31,8 +31,8 @@ func NewGame(aud *audio.Context, global *state.Global) *Game {
 	g.particles = make([]*particle, 0)
 	g.alienFleet = g.newFleet(0, 30, global, aud, 1)
 	g.bombs = make([]*bomb, 0, 10)
-	g.player = NewPlayer(aud, global, g)
 	g.state = global
+	g.player = newPlayer(aud, global, g)
 	g.score = g.newScore()
 	return g
 }

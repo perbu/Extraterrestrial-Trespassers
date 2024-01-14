@@ -17,12 +17,13 @@ type player struct {
 	global      *state.Global
 	game        *Game
 	dead        bool
+	gun         *gun
 }
 
-func NewPlayer(aud *audio.Context, state *state.Global, game *Game) player {
+func newPlayer(aud *audio.Context, state *state.Global, game *Game) player {
 	shootPlayer, _ := aud.NewPlayer(assets.GetShootSound())
 	crashPlayer, _ := aud.NewPlayer(assets.GetThud())
-	return player{
+	p := player{
 		position: position{
 			x: state.GetHeight() / 2,
 			y: state.GetHeight() - 50,
@@ -33,6 +34,8 @@ func NewPlayer(aud *audio.Context, state *state.Global, game *Game) player {
 		global:      state,
 		game:        game,
 	}
+	p.gun = p.newGun() // attach a gun.
+	return p
 }
 
 func (p *player) Update() {
@@ -61,6 +64,7 @@ func (p *player) Draw(screen *ebiten.Image) {
 		}
 	}
 	screen.DrawImage(p.asset.Sprite, op)
+	p.gun.Draw(screen)
 }
 
 func (p *player) Shoot() {
@@ -72,9 +76,10 @@ func (p *player) Shoot() {
 			x: p.position.x + 20,
 			y: p.position.y,
 		},
-		speed: projectileSpeed,
+		speed: p.gun.fire(),
 	}
 	p.game.projectiles = append(p.game.projectiles, proj)
+
 }
 
 func (p *player) Collision() {
