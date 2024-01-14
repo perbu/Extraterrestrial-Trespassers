@@ -1,18 +1,19 @@
 package game
 
 import (
+	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text"
 	"github.com/perbu/extraterrestrial_trespassers/assets"
 	"golang.org/x/image/font"
 	"image/color"
-	"strconv"
 )
 
 type score struct {
 	score    int
 	position position
 	face     font.Face
+	game     *Game
 }
 
 func (g *Game) newScore() *score {
@@ -23,10 +24,11 @@ func (g *Game) newScore() *score {
 	g.state.GetWidth()
 	return &score{
 		position: position{
-			g.state.GetWidth() - 100,
+			g.state.GetWidth() - 300,
 			20,
 		},
 		face: face,
+		game: g,
 	}
 }
 
@@ -35,5 +37,6 @@ func (s *score) AddScore(amount int) {
 }
 
 func (s *score) Draw(screen *ebiten.Image) {
-	text.Draw(screen, strconv.Itoa(s.score), s.face, s.position.x, s.position.y, color.White)
+	mess := fmt.Sprintf("Level %d Score: %d", s.game.alienFleet.level, s.score)
+	text.Draw(screen, mess, s.face, s.position.x, s.position.y, color.White)
 }

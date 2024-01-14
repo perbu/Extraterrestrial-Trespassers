@@ -7,6 +7,7 @@ import (
 	"github.com/perbu/extraterrestrial_trespassers/state"
 	"image/color"
 	"math/rand"
+	"time"
 )
 
 type fleet struct {
@@ -40,10 +41,10 @@ const (
 )
 
 const (
-	maxEnemySpeed = 20
+	maxEnemySpeed = 12 // level * 3 is added
 )
 
-func (g *Game) newFleet(x, y int, global *state.Global, aud *audio.Context, level int) *fleet {
+func (g *Game) newFleet(global *state.Global, aud *audio.Context, level int) *fleet {
 	width, _ := global.GetDimensions()
 	f := &fleet{
 		aud:       aud,
@@ -59,17 +60,21 @@ func (g *Game) newFleet(x, y int, global *state.Global, aud *audio.Context, leve
 		game:  g,
 		level: level,
 	}
+	f.populate()
+	return f
+}
+func (f *fleet) populate() {
 	for row := 0; row < 4; row++ {
 		for col := 0; col < 10; col++ {
 			pos := position{
-				x: x + col*50,
-				y: y + row*50,
+				x: 0 + col*70,
+				y: 30 + row*50,
 			}
-			e := f.spawnAlien(pos, enemyType(row), aud)
+			e := f.spawnAlien(pos, enemyType(row), f.aud)
 			f.enemies = append(f.enemies, e)
 		}
 	}
-	return f
+
 }
 
 func (f *fleet) Draw(screen *ebiten.Image) {
@@ -79,6 +84,13 @@ func (f *fleet) Draw(screen *ebiten.Image) {
 }
 
 func (f *fleet) Update() {
+	// check if there are enemies left:
+	if f.count() == 0 {
+		f.level++
+		f.populate()
+		f.game.state.FreezeUntil(time.Now().Add(2 * time.Second))
+	}
+
 	switch f.movingLeft {
 	case true:
 		for _, e := range f.enemies {
@@ -100,7 +112,7 @@ func (f *fleet) Update() {
 	// calculate the speed of the enemies. the fewer enemies, the faster they move
 
 	ratio := 1.0 - (float64(f.count()) / 40.0) // is 0 initially, and 1 when there are no enemies left
-	speed := int(maxEnemySpeed*ratio) + 2
+	speed := int(maxEnemySpeed*ratio) + f.level*3
 
 	for _, e := range f.enemies {
 		e.Update(f.movingLeft, speed)

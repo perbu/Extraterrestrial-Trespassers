@@ -1,12 +1,10 @@
 package state
 
 import (
-	"sync"
 	"time"
 )
 
 type Global struct {
-	mu          sync.Mutex
 	width       int
 	height      int
 	margins     int
@@ -53,14 +51,10 @@ func (g *Global) Update() bool {
 }
 
 func (g *Global) QueueAction(action Action) {
-	g.mu.Lock()
-	defer g.mu.Unlock()
 	g.actions = append(g.actions, action)
 }
 
 func (g *Global) ShiftAction() Action {
-	g.mu.Lock()
-	defer g.mu.Unlock()
 	if len(g.actions) == 0 {
 		return Nothing
 	}
@@ -70,49 +64,33 @@ func (g *Global) ShiftAction() Action {
 }
 
 func (g *Global) SetScene(scene Scene) {
-	g.mu.Lock()
-	defer g.mu.Unlock()
 	g.scene = scene
 }
 
 func (g *Global) GetScene() Scene {
-	g.mu.Lock()
-	defer g.mu.Unlock()
 	return g.scene
 }
 
 func (g *Global) GetDimensions() (int, int) {
-	g.mu.Lock()
-	defer g.mu.Unlock()
 	return g.width, g.height
 }
 
 func (g *Global) GetWidth() int {
-	g.mu.Lock()
-	defer g.mu.Unlock()
 	return g.width
 }
 
 func (g *Global) GetHeight() int {
-	g.mu.Lock()
-	defer g.mu.Unlock()
 	return g.height
 }
 
 func (g *Global) GetMargins() int {
-	g.mu.Lock()
-	defer g.mu.Unlock()
 	return g.margins
 }
 
 func (g *Global) FreezeUntil(t time.Time) {
-	g.mu.Lock()
-	defer g.mu.Unlock()
 	g.freezeUntil = t
 }
 
 func (g *Global) IsFrozen() bool {
-	g.mu.Lock()
-	defer g.mu.Unlock()
 	return g.freezeUntil.After(time.Now())
 }

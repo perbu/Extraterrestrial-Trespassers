@@ -3,7 +3,6 @@ package game
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/perbu/extraterrestrial_trespassers/assets"
-	"sync"
 )
 
 type lives struct {
@@ -11,7 +10,6 @@ type lives struct {
 	asset    assets.Asset
 	game     *Game
 	lives    int
-	mu       sync.Mutex
 }
 
 func NewLife(x, y int, game *Game) *lives {
@@ -37,20 +35,14 @@ func (l *lives) Draw(screen *ebiten.Image) {
 }
 
 func (l *lives) GetLives() int {
-	l.mu.Lock()
-	defer l.mu.Unlock()
 	return l.lives
 }
 
 func (l *lives) SetLives(lives int) {
-	l.mu.Lock()
-	defer l.mu.Unlock()
 	l.lives = lives
 }
 
 func (l *lives) DecrementLives() int {
-	l.mu.Lock()
-	defer l.mu.Unlock()
 	l.lives--
 	return l.lives
 }
