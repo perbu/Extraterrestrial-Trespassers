@@ -16,6 +16,7 @@ type fleet struct {
 	availableAssets []assets.Asset
 	aud             *audio.Context
 	game            *Game
+	level           int
 }
 
 type enemy struct {
@@ -25,6 +26,7 @@ type enemy struct {
 	enemyType enemyType
 	pl        *audio.Player
 	game      *Game
+	fleet     *fleet
 }
 
 type enemyType int
@@ -36,7 +38,7 @@ const (
 	enemyCyan
 )
 
-func (g *Game) newFleet(x, y int, global *state.Global, aud *audio.Context) *fleet {
+func (g *Game) newFleet(x, y int, global *state.Global, aud *audio.Context, level int) *fleet {
 	width, _ := global.GetDimensions()
 	f := &fleet{
 		aud:       aud,
@@ -49,7 +51,8 @@ func (g *Game) newFleet(x, y int, global *state.Global, aud *audio.Context) *fle
 			assets.GetYellow(),
 			assets.GetCyan(),
 		},
-		game: g,
+		game:  g,
+		level: level,
 	}
 	for row := 0; row < 4; row++ {
 		for col := 0; col < 10; col++ {
@@ -76,7 +79,7 @@ func (f *fleet) Update() {
 		for _, e := range f.enemies {
 			if e.position.x <= f.leftMost {
 				f.movingLeft = false
-				f.Descend(10)
+				f.Descend(20)
 				break
 			}
 		}
@@ -84,7 +87,7 @@ func (f *fleet) Update() {
 		for _, e := range f.enemies {
 			if e.position.x >= f.rightMost {
 				f.movingLeft = true
-				f.Descend(10)
+				f.Descend(20)
 				break
 			}
 		}
@@ -112,12 +115,12 @@ func (f *fleet) spawnAlien(pos position, et enemyType, aud *audio.Context) *enem
 		position:  pos,
 		pl:        pl,
 		game:      f.game,
+		fleet:     f,
 	}
 
 }
 
 func (e *enemy) Draw(screen *ebiten.Image) {
-
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(e.position.x), float64(e.position.y))
 	screen.DrawImage(e.asset.Sprite, op)
@@ -126,9 +129,9 @@ func (e *enemy) Draw(screen *ebiten.Image) {
 func (e *enemy) Update(ml bool) {
 	switch ml {
 	case true:
-		e.position.x -= 1
+		e.position.x -= e.fleet.level * 2
 	case false:
-		e.position.x += 1
+		e.position.x += e.fleet.level * 2
 	}
 }
 
@@ -136,16 +139,22 @@ func (e *enemy) kill() {
 	e.pl.Play()
 	e.dead = true
 	var pcolor color.Color
+	var score int
 	switch e.enemyType {
 	case enemyGreen:
 		pcolor = color.RGBA{R: 0, G: 255, B: 0, A: 255}
+		score = 5
 	case enemyRed:
 		pcolor = color.RGBA{R: 255, G: 0, B: 0, A: 255}
+		score = 3
 	case enemyYellow:
 		pcolor = color.RGBA{R: 255, G: 255, B: 0, A: 255}
+		score = 2
 	case enemyCyan:
 		pcolor = color.RGBA{R: 0, G: 255, B: 255, A: 255}
+		score = 1
 	}
+	e.game.score.AddScore(score)
 	center := e.findCenter()
 	for i := 0; i < 200; i++ {
 		e.game.particles = append(e.game.particles, newParticle(center, pcolor))

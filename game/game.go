@@ -17,6 +17,7 @@ type Game struct {
 	lives       *lives
 	state       *state.Global
 	particles   []*particle
+	score       *score
 }
 
 type position struct {
@@ -28,10 +29,11 @@ func NewGame(aud *audio.Context, global *state.Global) *Game {
 	g := &Game{}
 	g.lives = NewLife(0, 0, g)
 	g.particles = make([]*particle, 0)
-	g.alienFleet = g.newFleet(0, 30, global, aud)
+	g.alienFleet = g.newFleet(0, 30, global, aud, 1)
 	g.bombs = make([]*bomb, 0, 10)
 	g.player = NewPlayer(aud, global, g)
 	g.state = global
+	g.score = g.newScore()
 	return g
 }
 
@@ -129,6 +131,7 @@ func filterEnemies(enemies []*enemy) []*enemy {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
+	g.score.Draw(screen)
 	g.lives.Draw(screen)
 	g.player.Draw(screen)
 	for _, p := range g.projectiles {
