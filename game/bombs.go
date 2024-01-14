@@ -12,14 +12,14 @@ type bomb struct {
 	speed    int
 }
 
-func newBomb(x, y int) *bomb {
+func newBomb(x, y, maxSpeed int) *bomb {
 	return &bomb{
 		position: position{
 			x: x,
 			y: y,
 		},
 		asset: assets.GetBomb(),
-		speed: rand.Intn(8) + 3,
+		speed: rand.Intn(maxSpeed) + 2,
 	}
 }
 func (b *bomb) Update() {

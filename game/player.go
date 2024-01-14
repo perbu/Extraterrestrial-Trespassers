@@ -58,28 +58,33 @@ func (p *player) Draw(screen *ebiten.Image) {
 	p.gun.Draw(screen)
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(p.position.x), float64(p.position.y))
-	// check if we are frozen, if so, we should blink the player
+
 	if p.global.IsFrozen() {
 		if time.Now().UnixMilli()/100%2 == 0 {
 			return
 		}
 	}
 	screen.DrawImage(p.asset.Sprite, op)
+
 }
 
 func (p *player) Shoot() {
 	_ = p.shootPlayer.Rewind()
 	p.shootPlayer.Play()
+	gunpos := p.getGunPlacement()
 	proj := &projectile{
-		asset: assets.GetProjectile(),
-		position: position{
-			x: p.position.x + 20,
-			y: p.position.y,
-		},
-		speed: p.gun.fire(),
+		asset:    assets.GetProjectile(),
+		position: gunpos,
+		speed:    p.gun.fire(),
 	}
 	p.game.projectiles = append(p.game.projectiles, proj)
+}
 
+func (p *player) getGunPlacement() position {
+	return position{
+		x: p.position.x + p.asset.Bounds.Max.X/2,
+		y: p.position.y,
+	}
 }
 
 func (p *player) Collision() {
@@ -93,5 +98,17 @@ func (p *player) Collision() {
 
 func (p *player) Respawn() {
 	p.position.x = p.global.GetWidth() / 2
-
+	// clear the bombs directly above the player
+	rect := p.asset.Bounds
+	center := p.getGunPlacement()
+	xmin := center.x - rect.Max.X/2 - 30 // add some extra space to the left and right
+	xmax := center.x + rect.Max.X/2 - 30
+	ymin := center.y - 400
+	ymax := center.y + 10 // 10 pixels below the player, just to be sure
+	// now clear the bombs that are 200 pixels above the player
+	for i, bomb := range p.game.bombs {
+		if bomb.position.x > xmin && bomb.position.x < xmax && bomb.position.y > ymin && bomb.position.y < ymax {
+			p.game.bombs = append(p.game.bombs[:i], p.game.bombs[i+1:]...)
+		}
+	}
 }

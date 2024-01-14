@@ -38,11 +38,12 @@ func (l *lives) GetLives() int {
 	return l.lives
 }
 
-func (l *lives) SetLives(lives int) {
-	l.lives = lives
-}
-
 func (l *lives) DecrementLives() int {
 	l.lives--
+	return l.lives
+}
+
+func (l *lives) IncrementLives() int {
+	l.lives++
 	return l.lives
 }

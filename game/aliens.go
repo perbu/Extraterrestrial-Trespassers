@@ -89,6 +89,7 @@ func (f *fleet) Update() {
 		f.level++
 		f.populate()
 		f.game.state.FreezeUntil(time.Now().Add(2 * time.Second))
+		f.game.lives.IncrementLives()
 	}
 
 	switch f.movingLeft {
@@ -161,7 +162,7 @@ func (e *enemy) Update(ml bool, speed int) {
 	}
 	// Drop the bombs. The higher the speed the higher the chance of dropping a bomb
 	if rand.Intn(1000) < speed {
-		e.game.bombs = append(e.game.bombs, newBomb(e.position.x, e.position.y))
+		e.game.bombs = append(e.game.bombs, newBomb(e.position.x, e.position.y, speed/2))
 	}
 
 }
