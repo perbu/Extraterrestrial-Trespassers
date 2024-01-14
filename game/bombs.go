@@ -3,6 +3,7 @@ package game
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/perbu/extraterrestrial_trespassers/assets"
+	"math/rand"
 )
 
 type bomb struct {
@@ -11,14 +12,14 @@ type bomb struct {
 	speed    int
 }
 
-func newBomb(x, y, speed int) *bomb {
+func newBomb(x, y int) *bomb {
 	return &bomb{
 		position: position{
 			x: x,
 			y: y,
 		},
 		asset: assets.GetBomb(),
-		speed: speed,
+		speed: rand.Intn(8) + 3,
 	}
 }
 func (b *bomb) Update() {

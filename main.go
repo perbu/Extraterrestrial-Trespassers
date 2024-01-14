@@ -5,21 +5,27 @@ import (
 	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
+	"github.com/joho/godotenv"
 	"github.com/perbu/extraterrestrial_trespassers/assets"
 	"github.com/perbu/extraterrestrial_trespassers/game"
 	"github.com/perbu/extraterrestrial_trespassers/intro"
 	"github.com/perbu/extraterrestrial_trespassers/state"
 	"log"
+	"os"
 )
 
 type App struct {
-	game  *game.Game
-	intro *intro.StarField
-	state *state.Global
-	song  *audio.Player
+	game         *game.Game
+	intro        *intro.StarField
+	state        *state.Global
+	song         *audio.Player
+	music        bool
+	audioContext *audio.Context
 }
 
 func main() {
+	_ = godotenv.Load()
+
 	s := state.Initial()
 	ebiten.SetWindowSize(s.GetDimensions())
 	ebiten.SetWindowTitle("Extraterrestrial Trespassers")
@@ -29,12 +35,13 @@ func main() {
 	acontext := audio.NewContext(44100)
 	song, _ := acontext.NewPlayer(assets.GetSong())
 	app := &App{
-		game:  game.NewGame(acontext, s),
-		intro: intro.NewStarField(s),
-		state: s,
-		song:  song,
+		audioContext: acontext,
+		game:         game.NewGame(acontext, s),
+		intro:        intro.NewStarField(s),
+		state:        s,
+		song:         song,
+		music:        musicEnabled(),
 	}
-	song.Play()
 	err := ebiten.RunGame(app)
 	if err != nil {
 		log.Fatal(err)
@@ -42,8 +49,7 @@ func main() {
 }
 
 func (a *App) Update() error {
-
-	if !a.song.IsPlaying() {
+	if a.music && !a.song.IsPlaying() {
 		_ = a.song.Rewind()
 		a.song.Play()
 	}
@@ -62,6 +68,7 @@ func (a *App) Update() error {
 			break
 		case state.NewGame:
 			a.state.SetScene(state.SceneGame)
+			a.game = game.NewGame(a.audioContext, a.state)
 		case state.ShowCredits:
 			a.state.SetScene(state.SceneCredits)
 		case state.Quit:
@@ -105,4 +112,10 @@ func (a *App) Draw(screen *ebiten.Image) {
 
 func (a *App) Layout(outsideWidth, outsideHeight int) (int, int) {
 	return a.state.GetDimensions()
+}
+
+func musicEnabled() bool {
+	_, ok := os.LookupEnv("MUSIC_DISABLED")
+	fmt.Println("music enabled:", !ok)
+	return !ok
 }

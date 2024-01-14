@@ -55,6 +55,7 @@ func (p *player) Update() {
 
 }
 func (p *player) Draw(screen *ebiten.Image) {
+	p.gun.Draw(screen)
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(float64(p.position.x), float64(p.position.y))
 	// check if we are frozen, if so, we should blink the player
@@ -64,7 +65,6 @@ func (p *player) Draw(screen *ebiten.Image) {
 		}
 	}
 	screen.DrawImage(p.asset.Sprite, op)
-	p.gun.Draw(screen)
 }
 
 func (p *player) Shoot() {

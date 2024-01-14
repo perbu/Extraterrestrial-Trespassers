@@ -6,6 +6,7 @@ import (
 	"github.com/perbu/extraterrestrial_trespassers/assets"
 	"github.com/perbu/extraterrestrial_trespassers/state"
 	"image/color"
+	"math/rand"
 )
 
 type fleet struct {
@@ -36,6 +37,10 @@ const (
 	enemyRed
 	enemyYellow
 	enemyCyan
+)
+
+const (
+	maxEnemySpeed = 20
 )
 
 func (g *Game) newFleet(x, y int, global *state.Global, aud *audio.Context, level int) *fleet {
@@ -92,9 +97,13 @@ func (f *fleet) Update() {
 			}
 		}
 	}
+	// calculate the speed of the enemies. the fewer enemies, the faster they move
+
+	ratio := 1.0 - (float64(f.count()) / 40.0) // is 0 initially, and 1 when there are no enemies left
+	speed := int(maxEnemySpeed*ratio) + 2
 
 	for _, e := range f.enemies {
-		e.Update(f.movingLeft)
+		e.Update(f.movingLeft, speed)
 	}
 }
 
@@ -102,6 +111,10 @@ func (f *fleet) Descend(n int) {
 	for _, e := range f.enemies {
 		e.position.y += n
 	}
+}
+
+func (f *fleet) count() int {
+	return len(f.enemies)
 }
 
 // spawnAlien spawns an alien at the given position
@@ -126,13 +139,19 @@ func (e *enemy) Draw(screen *ebiten.Image) {
 	screen.DrawImage(e.asset.Sprite, op)
 }
 
-func (e *enemy) Update(ml bool) {
+func (e *enemy) Update(ml bool, speed int) {
+
 	switch ml {
 	case true:
-		e.position.x -= e.fleet.level * 2
+		e.position.x -= speed
 	case false:
-		e.position.x += e.fleet.level * 2
+		e.position.x += speed
 	}
+	// Drop the bombs. The higher the speed the higher the chance of dropping a bomb
+	if rand.Intn(1000) < speed {
+		e.game.bombs = append(e.game.bombs, newBomb(e.position.x, e.position.y))
+	}
+
 }
 
 func (e *enemy) kill() {

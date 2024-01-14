@@ -5,7 +5,6 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
 	"github.com/perbu/extraterrestrial_trespassers/state"
-	"math/rand"
 	"time"
 )
 
@@ -78,14 +77,6 @@ func (g *Game) Update() error {
 	// remove dead enemies from the fleet
 	g.alienFleet.enemies = filterEnemies(g.alienFleet.enemies)
 
-	// Drop the bombs:
-	for _, e := range g.alienFleet.enemies {
-		// 1% chance of dropping a bomb
-		if rand.Intn(1000) == 1 {
-			b := newBomb(e.position.x, e.position.y, 5)
-			g.bombs = append(g.bombs, b)
-		}
-	}
 	for _, b := range g.bombs {
 		b.Update()
 	}
