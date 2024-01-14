@@ -17,8 +17,8 @@ type lives struct {
 func NewLife(x, y int, game *Game) *lives {
 	return &lives{
 		position: position{
-			X: x,
-			Y: y,
+			x: x,
+			y: y,
 		},
 		asset: assets.GetPlayer(),
 		game:  game,
@@ -30,7 +30,7 @@ func (l *lives) Draw(screen *ebiten.Image) {
 	lives := l.lives
 	for i := 0; i < lives; i++ {
 		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(float64(l.position.X+i*100), float64(l.position.Y))
+		op.GeoM.Translate(float64(l.position.x+i*100), float64(l.position.y))
 		op.GeoM.Scale(.5, 0.5)
 		screen.DrawImage(l.asset.Sprite, op)
 	}

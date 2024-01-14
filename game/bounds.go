@@ -2,10 +2,10 @@ package game
 
 func (g *Game) withinBounds(p position) bool {
 	x, y := g.state.GetDimensions()
-	if p.X < 0 || p.X > x {
+	if p.x < 0 || p.x > x {
 		return false
 	}
-	if p.Y < 0 || p.Y > y {
+	if p.y < 0 || p.y > y {
 		return false
 	}
 	return true

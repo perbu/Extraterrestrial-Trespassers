@@ -54,6 +54,9 @@ var song []byte
 //go:embed thud.mp3
 var thud []byte
 
+//go:embed explosion.wav
+var explosion []byte
+
 func (a Asset) GetRect() image.Rectangle {
 	return a.Bounds
 }
@@ -159,5 +162,10 @@ func GetSong() *mp3.Stream {
 
 func GetThud() *mp3.Stream {
 	w, _ := mp3.DecodeWithSampleRate(sampleRate, bytes.NewReader(thud))
+	return w
+}
+
+func GetExplosion() *wav.Stream {
+	w, _ := wav.DecodeWithSampleRate(sampleRate, bytes.NewReader(explosion))
 	return w
 }

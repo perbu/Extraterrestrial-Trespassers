@@ -10,10 +10,10 @@ import (
 )
 
 type particle struct {
-	position  position
-	speed     float64
+	x, y      float32
+	speed     float32
 	direction float64
-	size      int
+	size      float32
 	color     color.Color
 	created   time.Time
 }
@@ -21,8 +21,9 @@ type particle struct {
 func newParticle(pos position, col color.Color) *particle {
 
 	return &particle{
-		position:  pos,
-		speed:     float64(rand.Intn(10) + 3),
+		x:         float32(pos.x),
+		y:         float32(pos.y),
+		speed:     projectileSpeed + rand.Float32()*5,
 		direction: generateDirection(),
 		size:      2,
 		color:     col,
@@ -30,12 +31,11 @@ func newParticle(pos position, col color.Color) *particle {
 	}
 }
 
-func (p *particle) Update() bool {
-	// update the position of the particle, use the direction and speed
+func (p *particle) Update() {
+	// update the position of the particle, use the direction (radians) and speed
 	// to calculate the new position
-	p.position.X += int(p.speed * math.Cos(p.direction))
-	p.position.Y += int(p.speed * math.Sin(p.direction))
-	return true
+	p.x += p.speed * float32(math.Sin(p.direction))
+	p.y -= p.speed * float32(math.Cos(p.direction))
 }
 
 const particleLifeTime = 1500
@@ -50,20 +50,28 @@ func (p *particle) Draw(screen *ebiten.Image) {
 	newColor := multiplyAlpha(p.color, 1-normalizedAgeFactor)
 	// fmt.Printf("age: %d, normalizedAgeFactor: %f, newAlpha: %d\n", age, normalizedAgeFactor, newAlpha)
 	vector.DrawFilledRect(screen,
-		float32(p.position.X),
-		float32(p.position.Y),
-		float32(p.size),
-		float32(p.size), newColor, false)
+		p.x,
+		p.y,
+		p.size,
+		p.size, newColor, false)
 }
 func (p *particle) age() int {
 	return int(time.Since(p.created).Milliseconds())
 }
 
-// generateDirection generates a random direction
 func generateDirection() float64 {
-	// Generate a random float between 0 and 2 * pi
-	randomValue := rand.Float64() * 2 * math.Pi
-	return randomValue
+	ran := skewedRandom() * (math.Pi / 2) // a random value between 0 and pi/2
+	if rand.Intn(2) == 0 {
+		return ran
+	} else {
+		return -ran
+	}
+}
+
+// skewedRandom returns a random number between 0 and 1, skewed towards 0.
+func skewedRandom() float64 {
+	lambda := 8.0 // Adjust lambda to control the skewness (higher values skew more towards 0)
+	return rand.ExpFloat64() / lambda
 }
 
 // multiplyAlpha takes a color.Color and a factor (between 0 and 1), and returns a new color with the alpha channel multiplied by the factor.

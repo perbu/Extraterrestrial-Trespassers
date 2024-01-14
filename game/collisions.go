@@ -9,17 +9,17 @@ import (
 func collides(aAsset assets.Asset, aPosition position, bAsset assets.Asset, bPosition position) bool {
 	// Adjust the bounds of each asset by their positions.
 	aBounds := image.Rect(
-		aAsset.Bounds.Min.X+aPosition.X,
-		aAsset.Bounds.Min.Y+aPosition.Y,
-		aAsset.Bounds.Max.X+aPosition.X,
-		aAsset.Bounds.Max.Y+aPosition.Y,
+		aAsset.Bounds.Min.X+aPosition.x,
+		aAsset.Bounds.Min.Y+aPosition.y,
+		aAsset.Bounds.Max.X+aPosition.x,
+		aAsset.Bounds.Max.Y+aPosition.y,
 	)
 
 	bBounds := image.Rect(
-		bAsset.Bounds.Min.X+bPosition.X,
-		bAsset.Bounds.Min.Y+bPosition.Y,
-		bAsset.Bounds.Max.X+bPosition.X,
-		bAsset.Bounds.Max.Y+bPosition.Y,
+		bAsset.Bounds.Min.X+bPosition.x,
+		bAsset.Bounds.Min.Y+bPosition.y,
+		bAsset.Bounds.Max.X+bPosition.x,
+		bAsset.Bounds.Max.Y+bPosition.y,
 	)
 
 	// Check for intersection.
