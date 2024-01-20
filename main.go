@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "embed"
 	"errors"
 	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -14,6 +15,9 @@ import (
 	"os"
 )
 
+//go:embed shader.kage
+var shaderSrc []byte
+
 type App struct {
 	game         *game.Game
 	intro        *intro.StarField
@@ -21,6 +25,8 @@ type App struct {
 	song         *audio.Player
 	music        bool
 	audioContext *audio.Context
+	offscreen    *ebiten.Image
+	shader       *ebiten.Shader
 }
 
 func main() {
@@ -32,6 +38,11 @@ func main() {
 	// set fullscreen:
 	ebiten.SetFullscreen(true)
 
+	shader, err := ebiten.NewShader(shaderSrc)
+	if err != nil {
+		log.Fatalf("Failed to create shader: %v", err)
+	}
+
 	acontext := audio.NewContext(44100)
 	song, _ := acontext.NewPlayer(assets.GetSong())
 	app := &App{
@@ -41,8 +52,10 @@ func main() {
 		state:        s,
 		song:         song,
 		music:        musicEnabled(),
+		offscreen:    ebiten.NewImage(s.GetDimensions()),
+		shader:       shader,
 	}
-	err := ebiten.RunGame(app)
+	err = ebiten.RunGame(app)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -100,14 +113,21 @@ func (a *App) Update() error {
 }
 
 func (a *App) Draw(screen *ebiten.Image) {
+	a.offscreen.Clear()
 	switch a.state.GetScene() {
 	case state.SceneMenu:
-		a.intro.Draw(screen)
+		a.intro.Draw(a.offscreen)
 	case state.SceneGame:
-		a.game.Draw(screen)
+		a.game.Draw(a.offscreen)
 	case state.SceneCredits:
 		panic("not implemented")
 	}
+	w, h := a.state.GetDimensions()
+	options := &ebiten.DrawRectShaderOptions{}
+	options.Images[0] = a.offscreen
+	options.GeoM.Translate(0, 0)
+	screen.DrawRectShader(w, h, a.shader, options)
+
 }
 
 func (a *App) Layout(outsideWidth, outsideHeight int) (int, int) {
