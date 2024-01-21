@@ -111,7 +111,7 @@ func (p *player) Respawn() {
 	// now clear the bombs that are 200 pixels above the player
 	for i, bomb := range p.game.bombs {
 		if bomb.position.x > xMin && bomb.position.x < xMax && bomb.position.y > yMin {
-			p.game.bombs = append(p.game.bombs[:i], p.game.bombs[i+1:]...)
+			removeElement(p.game.bombs, i)
 		}
 	}
 }
