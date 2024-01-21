@@ -25,7 +25,7 @@ func newPlayer(aud *audio.Context, state *state.Global, game *Game) player {
 	crashPlayer, _ := aud.NewPlayer(assets.GetThud())
 	p := player{
 		position: position{
-			x: state.GetHeight() / 2,
+			x: state.GetWidth() / 2,
 			y: state.GetHeight() - 50,
 		},
 		asset:       assets.GetPlayer(),
@@ -69,6 +69,8 @@ func (p *player) Draw(screen *ebiten.Image) {
 }
 
 func (p *player) Shoot() {
+	vol := p.game.state.GetVolume()
+	p.shootPlayer.SetVolume(vol)
 	_ = p.shootPlayer.Rewind()
 	p.shootPlayer.Play()
 	gunpos := p.getGunPlacement()
@@ -88,6 +90,8 @@ func (p *player) getGunPlacement() position {
 }
 
 func (p *player) Collision() {
+	vol := p.game.state.GetVolume()
+	p.crashPlayer.SetVolume(vol)
 	_ = p.crashPlayer.Rewind()
 	p.crashPlayer.Play()
 	p.game.lives.DecrementLives()
@@ -97,17 +101,16 @@ func (p *player) Collision() {
 }
 
 func (p *player) Respawn() {
-	p.position.x = p.global.GetWidth() / 2
-	// clear the bombs directly above the player
+	centerX := p.global.GetWidth() / 2
+	p.position.x = centerX
 	rect := p.asset.Bounds
-	center := p.getGunPlacement()
-	xmin := center.x - rect.Max.X/2 - 30 // add some extra space to the left and right
-	xmax := center.x + rect.Max.X/2 - 30
-	ymin := center.y - 400
-	ymax := center.y + 10 // 10 pixels below the player, just to be sure
+	// leave one whole player on each side of the center
+	xMin := centerX - rect.Max.X
+	xMax := centerX + rect.Max.X
+	yMin := 300
 	// now clear the bombs that are 200 pixels above the player
 	for i, bomb := range p.game.bombs {
-		if bomb.position.x > xmin && bomb.position.x < xmax && bomb.position.y > ymin && bomb.position.y < ymax {
+		if bomb.position.x > xMin && bomb.position.x < xMax && bomb.position.y > yMin {
 			p.game.bombs = append(p.game.bombs[:i], p.game.bombs[i+1:]...)
 		}
 	}

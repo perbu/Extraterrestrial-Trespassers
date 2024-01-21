@@ -24,14 +24,14 @@ type position struct {
 	y int
 }
 
-func NewGame(aud *audio.Context, global *state.Global) *Game {
+func NewGame(audio *audio.Context, global *state.Global) *Game {
 	g := &Game{}
 	g.lives = NewLife(0, 0, g)
 	g.particles = make([]*particle, 0)
-	g.alienFleet = g.newFleet(global, aud, 1)
+	g.alienFleet = g.newFleet(global, audio, 1)
 	g.bombs = make([]*bomb, 0, 10)
 	g.state = global
-	g.player = newPlayer(aud, global, g)
+	g.player = newPlayer(audio, global, g)
 	g.score = g.newScore()
 	return g
 }

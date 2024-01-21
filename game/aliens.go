@@ -16,9 +16,10 @@ type fleet struct {
 	leftMost        int
 	rightMost       int
 	availableAssets []assets.Asset
-	aud             *audio.Context
+	audio           *audio.Context
 	game            *Game
 	level           int
+	bombFactor      int
 }
 
 type enemy struct {
@@ -44,10 +45,10 @@ const (
 	maxEnemySpeed = 12 // level * 3 is added
 )
 
-func (g *Game) newFleet(global *state.Global, aud *audio.Context, level int) *fleet {
+func (g *Game) newFleet(global *state.Global, audio *audio.Context, level int) *fleet {
 	width, _ := global.GetDimensions()
 	f := &fleet{
-		aud:       aud,
+		audio:     audio,
 		enemies:   make([]*enemy, 0, 40),
 		leftMost:  global.GetMargins(),
 		rightMost: width - global.GetMargins(),
@@ -57,8 +58,9 @@ func (g *Game) newFleet(global *state.Global, aud *audio.Context, level int) *fl
 			assets.GetYellow(),
 			assets.GetCyan(),
 		},
-		game:  g,
-		level: level,
+		game:       g,
+		level:      level,
+		bombFactor: 1300,
 	}
 	f.populate()
 	return f
@@ -70,7 +72,7 @@ func (f *fleet) populate() {
 				x: 0 + col*70,
 				y: 30 + row*50,
 			}
-			e := f.spawnAlien(pos, enemyType(row), f.aud)
+			e := f.spawnAlien(pos, enemyType(row), f.audio)
 			f.enemies = append(f.enemies, e)
 		}
 	}
@@ -143,7 +145,6 @@ func (f *fleet) spawnAlien(pos position, et enemyType, aud *audio.Context) *enem
 		game:      f.game,
 		fleet:     f,
 	}
-
 }
 
 func (e *enemy) Draw(screen *ebiten.Image) {
@@ -161,13 +162,15 @@ func (e *enemy) Update(ml bool, speed int) {
 		e.position.x += speed
 	}
 	// Drop the bombs. The higher the speed the higher the chance of dropping a bomb
-	if rand.Intn(1000) < speed {
+	if rand.Intn(e.fleet.bombFactor) < speed {
 		e.game.bombs = append(e.game.bombs, newBomb(e.position.x, e.position.y, speed/2))
 	}
 
 }
 
 func (e *enemy) kill() {
+	vol := e.fleet.game.state.GetVolume()
+	e.pl.SetVolume(vol)
 	e.pl.Play()
 	e.dead = true
 	var pcolor color.Color

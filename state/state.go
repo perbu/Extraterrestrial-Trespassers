@@ -1,6 +1,8 @@
 package state
 
 import (
+	"os"
+	"strconv"
 	"time"
 )
 
@@ -11,6 +13,7 @@ type Global struct {
 	scene       Scene
 	actions     []Action // queue of actions to be processed
 	freezeUntil time.Time
+	volume      float64
 }
 
 type Scene int
@@ -37,11 +40,23 @@ const (
 //go:generate stringer -type=Action
 
 func Initial() *Global {
+	volStr := os.Getenv("VOLUME")
+	vol := 0.8
+	if volStr != "" {
+		var err error
+		// read the volume float from env:
+		vol, err = strconv.ParseFloat(volStr, 64)
+		if err != nil {
+			vol = 0.8
+		}
+	}
+
 	return &Global{
 		width:   1200,
 		height:  900,
 		margins: 50,
 		scene:   SceneMenu,
+		volume:  vol,
 	}
 }
 
@@ -93,4 +108,8 @@ func (g *Global) FreezeUntil(t time.Time) {
 
 func (g *Global) IsFrozen() bool {
 	return g.freezeUntil.After(time.Now())
+}
+
+func (g *Global) GetVolume() float64 {
+	return g.volume
 }

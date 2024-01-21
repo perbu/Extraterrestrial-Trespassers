@@ -10,13 +10,11 @@ import (
 	"github.com/perbu/extraterrestrial_trespassers/assets"
 	"github.com/perbu/extraterrestrial_trespassers/game"
 	"github.com/perbu/extraterrestrial_trespassers/intro"
+	"github.com/perbu/extraterrestrial_trespassers/shader"
 	"github.com/perbu/extraterrestrial_trespassers/state"
 	"log"
 	"os"
 )
-
-//go:embed shader.kage
-var shaderSrc []byte
 
 type App struct {
 	game         *game.Game
@@ -25,8 +23,8 @@ type App struct {
 	song         *audio.Player
 	music        bool
 	audioContext *audio.Context
-	offscreen    *ebiten.Image
-	shader       *ebiten.Shader
+	shaderBuffer *ebiten.Image
+	shader       shader.Shader
 }
 
 func main() {
@@ -38,9 +36,9 @@ func main() {
 	// set fullscreen:
 	ebiten.SetFullscreen(true)
 
-	shader, err := ebiten.NewShader(shaderSrc)
+	lotte, err := shader.NewCrtLotte()
 	if err != nil {
-		log.Fatalf("Failed to create shader: %v", err)
+		panic(err)
 	}
 
 	acontext := audio.NewContext(44100)
@@ -52,8 +50,8 @@ func main() {
 		state:        s,
 		song:         song,
 		music:        musicEnabled(),
-		offscreen:    ebiten.NewImage(s.GetDimensions()),
-		shader:       shader,
+		shaderBuffer: ebiten.NewImage(s.GetDimensions()),
+		shader:       lotte,
 	}
 	err = ebiten.RunGame(app)
 	if err != nil {
@@ -113,20 +111,20 @@ func (a *App) Update() error {
 }
 
 func (a *App) Draw(screen *ebiten.Image) {
-	a.offscreen.Clear()
+	a.shaderBuffer.Clear()
 	switch a.state.GetScene() {
 	case state.SceneMenu:
-		a.intro.Draw(a.offscreen)
+		a.intro.Draw(a.shaderBuffer)
 	case state.SceneGame:
-		a.game.Draw(a.offscreen)
+		a.game.Draw(a.shaderBuffer)
 	case state.SceneCredits:
 		panic("not implemented")
 	}
-	w, h := a.state.GetDimensions()
-	options := &ebiten.DrawRectShaderOptions{}
-	options.Images[0] = a.offscreen
-	options.GeoM.Translate(0, 0)
-	screen.DrawRectShader(w, h, a.shader, options)
+	err := a.shader.Apply(screen, a.shaderBuffer)
+	if err != nil {
+		panic(err)
+	}
+	// screen.DrawRectShader(w, h, a.shader, options)
 
 }
 
