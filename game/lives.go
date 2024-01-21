@@ -29,7 +29,7 @@ func (l *lives) Draw(screen *ebiten.Image) {
 	for i := 0; i < lives; i++ {
 		op := &ebiten.DrawImageOptions{}
 		op.GeoM.Translate(float64(l.position.x+i*100), float64(l.position.y))
-		op.GeoM.Scale(.5, 0.5)
+		op.GeoM.Scale(.75, 0.75)
 		screen.DrawImage(l.asset.Sprite, op)
 	}
 }
